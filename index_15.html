@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derivatives Sales Dashboard — Mubasher Capital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F4F3; --card:#FFFFFF; --ink:#14201D; --muted:#5B6B66; --line:#DDE4E1;
+    --lead:#2E5AAC; --fup:#7A5AF8; --open:#B45309; --funded:#0E7A5F; --lost:#B42318;
+    --chip:#E8EDEB; --focus:#0E7A5F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:15px}
+  body{background:var(--paper);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,.disp{font-family:'Barlow Semi Condensed',sans-serif}
+  .num{font-variant-numeric:tabular-nums}
+  button{font-family:inherit;cursor:pointer}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  a{color:var(--lead)}
+
+  header{position:sticky;top:0;z-index:50;background:var(--ink);color:#F2F4F3;padding:.65rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+  header h1{font-size:1.15rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+  header h1 span{color:#7BC4AE;font-weight:500}
+  .conn{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:#B9C7C2}
+  .dot{width:.55rem;height:.55rem;border-radius:50%;background:#B42318}
+  .dot.on{background:#3CCB7F}
+  header .grow{flex:1}
+  .hbtn{background:transparent;border:1px solid #3B4A45;color:#E4ECE9;border-radius:6px;padding:.4rem .8rem;font-size:.82rem;font-weight:600}
+  .hbtn:hover{background:#243430}
+  .hbtn.primary{background:#0E7A5F;border-color:#0E7A5F}
+  .hbtn.primary:hover{background:#0C6A52}
+
+  .periodbar{position:sticky;top:52px;z-index:40;background:var(--card);border-bottom:1px solid var(--line);padding:.55rem 1.25rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+  .periodbar .lbl{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:.25rem}
+  .chipbtn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:.32rem .85rem;font-size:.8rem;font-weight:600;color:var(--ink)}
+  .chipbtn:hover{border-color:#9FB3AC}
+  .chipbtn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .custom-range{display:flex;align-items:center;gap:.35rem;font-size:.8rem}
+  .custom-range input{border:1px solid var(--line);border-radius:6px;padding:.28rem .4rem;font-family:inherit;font-size:.8rem}
+  .periodbar .updated{margin-left:auto;font-size:.75rem;color:var(--muted)}
+
+  main{max-width:1280px;margin:0 auto;padding:1.25rem}
+  section{margin-bottom:1.75rem}
+  .sechead{display:flex;align-items:baseline;gap:.75rem;margin-bottom:.7rem;flex-wrap:wrap}
+  .sechead h2{font-size:1.05rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .sechead .sub{font-size:.78rem;color:var(--muted)}
+
+  .focusbar{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--funded);border-radius:12px;padding:.75rem 1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+  .focusbar .flbl{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .focusbar select{border:1px solid var(--line);border-radius:8px;padding:.4rem .5rem;font-family:inherit;font-size:.82rem;max-width:280px}
+  .focusbar .fnote{font-size:.73rem;color:var(--muted)}
+  .focusbar .fclear{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:.3rem .8rem;font-size:.78rem;font-weight:600}
+  .focus-on{background:#EFF6F3}
+  .msWrap{position:relative;display:inline-block}
+  .msBtn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:.4rem .7rem;font-size:.82rem;font-weight:600;color:var(--ink);min-width:150px;text-align:left}
+  .msBtn::after{content:'▾';float:right;color:var(--muted);margin-left:.5rem}
+  .msBtn:hover{border-color:#9FB3AC}
+  .msPanel{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:60;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(16,24,29,.14);min-width:240px;max-height:320px;overflow-y:auto;padding:.4rem}
+  .msPanel.show{display:block}
+  .msTools{display:flex;gap:.35rem;padding:.15rem .3rem .4rem;border-bottom:1px solid var(--line);margin-bottom:.3rem}
+  .msTools button{flex:1;border:1px solid var(--line);background:var(--card);border-radius:6px;padding:.25rem .4rem;font-size:.74rem;font-weight:600}
+  .msPanel label{display:flex;gap:.5rem;align-items:center;font-size:.82rem;padding:.28rem .35rem;border-radius:6px;cursor:pointer}
+  .msPanel label:hover{background:#F2F6F4}
+  .msPanel label .cnt{margin-left:auto;color:var(--muted);font-size:.74rem}
+
+  .ovgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  @media(max-width:900px){.ovgrid{grid-template-columns:1fr}}
+  .ovcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem}
+  .ovcard h3{font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+  .ovcard h3 em{font-style:normal;font-weight:500;letter-spacing:0;text-transform:none;font-size:.72rem}
+  .ovstats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .9rem;margin:.8rem 0 .9rem}
+  .stat .v{font-family:'Barlow Semi Condensed';font-size:1.9rem;font-weight:700;line-height:1}
+  .stat .k{font-size:.72rem;color:var(--muted);margin-top:.15rem}
+  .stat.lead .v{color:var(--lead)} .stat.fup .v{color:var(--fup)}
+  .stat.open .v{color:var(--open)} .stat.funded .v{color:var(--funded)}
+  .convline{font-size:.78rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:.55rem}
+  .convline b{color:var(--ink)}
+  .stagelist{margin-top:.6rem;border-top:1px dashed var(--line);padding-top:.45rem}
+  .stagelist .srow{display:flex;align-items:center;gap:.45rem;font-size:.78rem;padding:.16rem 0}
+  .stagelist .srow i{width:.6rem;height:.6rem;border-radius:2px;flex:none}
+  .stagelist .srow .sname{flex:1;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .stagelist .srow .sval{font-weight:700}
+  .stagelist .srow .spct{color:var(--muted);min-width:3.2rem;text-align:right}
+
+  .strip{display:flex;height:1.35rem;border-radius:7px;overflow:hidden;border:1px solid var(--line);margin-top:.6rem}
+  .strip .seg{min-width:2px;transition:filter .15s}
+  .strip .seg:hover{filter:brightness(1.15)}
+  .striplegend{display:flex;flex-wrap:wrap;gap:.3rem .8rem;margin-top:.45rem;font-size:.72rem;color:var(--muted)}
+  .striplegend i{display:inline-block;width:.6rem;height:.6rem;border-radius:2px;margin-right:.3rem;vertical-align:-1px}
+
+  .pipe-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem}
+  .stage-cells{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem}
+  .stage-cell{flex:1;min-width:110px;border:1px solid var(--line);border-radius:9px;padding:.55rem .7rem;border-top-width:3px}
+  .stage-cell .v{font-family:'Barlow Semi Condensed';font-size:1.45rem;font-weight:700}
+  .stage-cell .k{font-size:.72rem;color:var(--muted)}
+
+  .tcard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  thead th{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:right;padding:.6rem .8rem;border-bottom:1px solid var(--line);background:#FAFBFA;cursor:pointer;user-select:none;white-space:nowrap}
+  thead th:first-child{text-align:left}
+  thead th.sorted::after{content:' ▾';color:var(--funded)}
+  tbody td{padding:.55rem .8rem;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  tbody td:first-child{text-align:left;font-weight:600;max-width:340px;overflow:hidden;text-overflow:ellipsis}
+  tbody tr.row{cursor:pointer}
+  tbody tr.row:hover{background:#F4F8F6}
+  tbody tr.row.open{background:#EFF6F3}
+  .pill{display:inline-block;border-radius:999px;padding:.1rem .55rem;font-size:.74rem;font-weight:700}
+  .pill.funded{background:#E2F3EC;color:var(--funded)}
+  .pill.open{background:#FBEEDD;color:var(--open)}
+  tr.detail td{background:#F7FAF8;padding:.7rem .9rem;white-space:normal}
+  .caret{display:inline-block;transition:transform .15s;color:var(--muted);margin-right:.4rem;font-size:.7rem}
+  tr.open .caret{transform:rotate(90deg)}
+  .rate{color:var(--muted);font-weight:500}
+  tfoot td{padding:.55rem .8rem;font-weight:700;background:#FAFBFA;text-align:right;border-top:2px solid var(--line)}
+  tfoot td:first-child{text-align:left}
+  .audit{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:.6rem}
+  .audit th{font-size:.66rem;text-align:left;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:.3rem .5rem;border-bottom:1px solid var(--line);background:transparent;cursor:default}
+  .audit td{padding:.3rem .5rem;border-bottom:1px solid #E9EFEC;text-align:left;white-space:normal;font-weight:400;max-width:none}
+  .cat{display:inline-block;border-radius:4px;padding:.05rem .4rem;font-size:.7rem;font-weight:700;background:var(--chip)}
+  .cat.call{background:#E2F3EC;color:var(--funded)} .cat.email{background:#E7ECF8;color:var(--lead)}
+  .cat.chat{background:#F0EBFD;color:var(--fup)} .cat.todo{background:#FBEEDD;color:var(--open)}
+  .cat.meeting{background:#EDE9E1;color:#6B5B2A}
+  .ent{display:inline-block;border-radius:4px;padding:.05rem .35rem;font-size:.66rem;font-weight:700;background:#EEF1F0;color:var(--muted);margin-right:.3rem}
+
+  .drawer-bg{position:fixed;inset:0;background:rgba(16,24,29,.45);z-index:90;display:none}
+  .drawer-bg.show{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(500px,100%);background:var(--card);z-index:100;transform:translateX(105%);transition:transform .2s ease;display:flex;flex-direction:column;box-shadow:-8px 0 30px rgba(0,0,0,.15)}
+  .drawer.show{transform:none}
+  .drawer header{position:static;background:var(--ink)}
+  .drawer .body{padding:1.1rem;overflow-y:auto;flex:1}
+  .field{margin-bottom:1.1rem}
+  .field label{display:block;font-size:.78rem;font-weight:700;margin-bottom:.3rem}
+  .field .hint{font-size:.73rem;color:var(--muted);margin-top:.3rem;line-height:1.45}
+  .field input[type=text],.field input[type=password],.field select{width:100%;border:1px solid var(--line);border-radius:8px;padding:.5rem .6rem;font-family:inherit;font-size:.85rem}
+  .checklist{border:1px solid var(--line);border-radius:8px;max-height:190px;overflow-y:auto;padding:.4rem .6rem;font-size:.82rem}
+  .checklist label,.inline-check{display:flex;gap:.5rem;align-items:center;font-weight:500;padding:.2rem 0;font-size:.82rem}
+  .drawer .foot{padding:1rem;border-top:1px solid var(--line);display:flex;gap:.6rem}
+  .btn{border-radius:8px;padding:.55rem 1rem;font-size:.85rem;font-weight:700;border:1px solid var(--line);background:var(--card)}
+  .btn.primary{background:var(--funded);border-color:var(--funded);color:#fff}
+  .btn.primary:hover{background:#0C6A52}
+  .note{font-size:.76rem;line-height:1.5;background:#F3F7F5;border:1px solid var(--line);border-radius:8px;padding:.6rem .7rem;color:#3C4A45}
+
+  #loading{display:none;position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:.55rem 1.2rem;font-size:.82rem;z-index:80;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  #empty{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:3rem 1.5rem;text-align:center;color:var(--muted)}
+  #empty .disp{font-size:1.3rem;color:var(--ink);font-weight:700;margin-bottom:.4rem}
+  #errbar{display:none;background:#FBEAE7;border:1px solid #ECC2BA;color:#7A2417;border-radius:10px;padding:.7rem .9rem;font-size:.82rem;margin-bottom:1rem;line-height:1.5}
+  #warnbar{display:none;background:#FCF4E4;border:1px solid #EAD6A9;color:#6B4E12;border-radius:10px;padding:.7rem .9rem;font-size:.82rem;margin-bottom:1rem;line-height:1.5}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Derivatives Sales <span>/ Bitrix24 Live</span></h1>
+  <div class="conn"><span class="dot" id="connDot"></span><span id="connTxt">Not connected</span></div>
+  <div class="grow"></div>
+  <button class="hbtn" id="btnSettings">Settings</button>
+  <button class="hbtn primary" id="btnRefresh">Refresh data</button>
+</header>
+
+<div class="periodbar" id="periodbar">
+  <span class="lbl">Breakdown period</span>
+  <button class="chipbtn" data-p="today">Today</button>
+  <button class="chipbtn" data-p="yesterday">Yesterday</button>
+  <button class="chipbtn active" data-p="week">This week</button>
+  <button class="chipbtn" data-p="lastweek">Last week</button>
+  <button class="chipbtn" data-p="month">This month</button>
+  <button class="chipbtn" data-p="lastmonth">Last month</button>
+  <span class="custom-range">
+    <input type="date" id="cFrom" aria-label="From date"> →
+    <input type="date" id="cTo" aria-label="To date">
+    <button class="chipbtn" id="btnApplyCustom">Apply</button>
+  </span>
+  <span class="updated" id="lastUpdated"></span>
+</div>
+
+<main>
+  <div id="errbar"></div>
+  <div id="warnbar"></div>
+  <div id="diagbar" style="display:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.6rem .9rem;font-size:.78rem;color:var(--muted);margin-bottom:1rem"></div>
+
+  <div id="empty">
+    <div class="disp">Connect your Bitrix24 to go live</div>
+    <p>Open <b>Settings</b>, paste your inbound webhook URL, and the dashboard pulls leads, activities, tasks and deals directly from the CRM. No Excel exports.</p>
+    <p style="margin-top:.7rem"><button class="btn primary" onclick="openDrawer()">Open settings</button></p>
+  </div>
+
+  <div id="dash" style="display:none">
+
+    <!-- 1. OVERVIEW (always global) -->
+    <section>
+      <div class="sechead"><h2>Team activity overview</h2><span class="sub">all campaigns & channels — today, this week, this month · follow-ups and funding counted on the day they happened</span></div>
+      <div class="ovgrid" id="ovgrid"></div>
+    </section>
+
+    <!-- FOCUS -->
+    <div class="focusbar" id="focusbar">
+      <span class="flbl">Focus</span>
+      <span class="msWrap">
+        <button type="button" class="msBtn" id="focusCampBtn" aria-expanded="false">All campaigns</button>
+        <div class="msPanel" id="focusCampPanel">
+          <div class="msTools">
+            <button type="button" id="msCampAll">Select all</button>
+            <button type="button" id="msCampNone">Clear</button>
+          </div>
+          <div id="focusCampList"></div>
+        </div>
+      </span>
+      <select id="focusChannel"><option value="">All sales channels</option></select>
+      <select id="focusSource"><option value="">All lead sources</option></select>
+      <span class="msWrap">
+        <button type="button" class="msBtn" id="focusEmpBtn" aria-expanded="false">All employees</button>
+        <div class="msPanel" id="focusEmpPanel">
+          <div class="msTools">
+            <button type="button" id="msAll">Select all</button>
+            <button type="button" id="msNone">Clear</button>
+          </div>
+          <div id="focusEmpList"></div>
+        </div>
+      </span>
+      <button class="fclear" id="btnClearFocus">Clear</button>
+      <span class="fnote">Pick one campaign or channel to see its details only. Overview cards above stay global; everything below follows the focus.</span>
+    </div>
+
+    <!-- CAMPAIGN COHORT (all-time, campaign-anchored) -->
+    <section id="secCohort" style="display:none">
+      <div class="sechead"><h2>All-time totals — <span id="cohortName"></span></h2><span class="sub">every lead ever matching this selection, ignoring the period above</span></div>
+      <div class="pipe-card" id="cohortCard"></div>
+    </section>
+
+    <!-- 2. PIPELINE -->
+    <section>
+      <div class="sechead"><h2>Pipeline — <span id="pTitle1"></span></h2><span class="sub">current stage of leads created in the period</span></div>
+      <div class="pipe-card" id="pipeCard"></div>
+    </section>
+
+    <!-- DAILY DETAIL (focus mode) -->
+    <section id="secDaily" style="display:none">
+      <div class="sechead"><h2>Day by day — <span id="pTitleD"></span></h2><span class="sub">daily numbers for the focused selection</span></div>
+      <div class="tcard"><table id="tblDaily"></table></div>
+    </section>
+
+    <!-- 3. CAMPAIGNS -->
+    <section>
+      <div class="sechead"><h2>Per campaign — <span id="pTitle2"></span></h2><span class="sub">click a row for its stage breakdown · click headers to sort</span></div>
+      <div class="tcard"><table id="tblCampaign"></table></div>
+    </section>
+
+    <!-- 4. CHANNELS -->
+    <section>
+      <div class="sechead"><h2>Per sales channel — <span id="pTitle3"></span></h2><span class="sub">a lead with two channels counts in both rows</span></div>
+      <div class="tcard"><table id="tblChannel"></table></div>
+    </section>
+
+    <!-- 4b. LEAD SOURCE -->
+    <section>
+      <div class="sechead"><h2>Per lead source — <span id="pTitle3b"></span></h2><span class="sub">where the client came from when there is no campaign — dormant accounts, referrals, walk-ins, support team</span></div>
+      <div class="tcard"><table id="tblSource"></table></div>
+    </section>
+
+    <!-- 5. EMPLOYEES -->
+    <section>
+      <div class="sechead"><h2>Per employee — <span id="pTitle4"></span></h2><span class="sub">click a row to audit the exact follow-up activities counted</span></div>
+      <div class="tcard"><table id="tblEmployee"></table></div>
+    </section>
+
+  </div>
+</main>
+
+<div id="loading">Loading…</div>
+
+<!-- SETTINGS DRAWER -->
+<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer" role="dialog" aria-label="Settings">
+  <header><h1 style="font-size:1rem">Settings</h1><div class="grow"></div><button class="hbtn" onclick="closeDrawer()">Close</button></header>
+  <div class="body">
+    <div class="field">
+      <label for="whUrl">Bitrix24 inbound webhook URL</label>
+      <input type="password" id="whUrl" placeholder="https://mubashercapitalcrm.com/rest/1/xxxxxxxx/">
+      <div class="hint">Developer resources → Other → Inbound webhook, with <b>CRM (crm)</b>, <b>Users (user)</b> and <b>Tasks (task)</b> permissions. The Tasks permission lets the dashboard count completed Bitrix tasks bound to leads/deals as follow-ups. Saved in this browser only.</div>
+      <p style="margin-top:.5rem"><button class="btn" id="btnTest">Test connection</button> <span id="testResult" style="font-size:.8rem"></span></p>
+    </div>
+
+    <div class="field">
+      <label for="fCampaign">Campaign name field (on leads)</label>
+      <select id="fCampaign"><option value="">— connect first —</option></select>
+      <div class="hint">The field that holds Campaign Name. Multi-select fields are supported — each campaign on the lead gets credit.</div>
+    </div>
+
+    <div class="field">
+      <label for="fCampaignDeal">Campaign name field (on deals)</label>
+      <select id="fCampaignDeal"><option value="">— read through the originating lead —</option></select>
+    </div>
+
+    <div class="field">
+      <label for="fPrevCampaign">Previous campaign field (on leads)</label>
+      <select id="fPrevCampaign"><option value="">— none —</option></select>
+      <div class="hint">The field where you record the earlier campaign after updating Campaign Name. Filtering by a campaign will then also find leads that have since moved to a newer campaign.</div>
+    </div>
+
+    <div class="field">
+      <label for="fCampaignDate">Campaign date field (on leads)</label>
+      <select id="fCampaignDate"><option value="">— none —</option></select>
+      <div class="hint">Used two ways: an empty campaign date means the lead was added by the sales team rather than a paid form, and comparing it to the lead's creation date separates new leads from ones that already existed in the CRM.</div>
+    </div>
+
+    <div class="field">
+      <label for="fChannel">Sales channel field (on leads)</label>
+      <select id="fChannel"><option value="SOURCE_ID">Bitrix Source (SOURCE_ID)</option></select>
+      <div class="hint">Pick your own "Sales Channels" field here. Multi-select supported. Deals take the channel from their originating lead when you use a custom field.</div>
+    </div>
+
+    <div class="field">
+      <label>What counts as a follow-up</label>
+      <div class="checklist" id="fupCats"></div>
+      <label class="inline-check" style="margin-top:.4rem"><input type="checkbox" id="fupOutgoing"> Count outgoing only (exclude incoming calls/messages)</label>
+      <div class="hint">Follow-ups are counted on the day they were <b>completed</b>, not their planned deadline. Bitrix logs some activities automatically (incoming WhatsApp sessions, emails) — untick what shouldn't count. Use the employee audit view to verify.</div>
+    </div>
+
+    <div class="field">
+      <label>Employees shown in the per-employee table</label>
+      <div class="checklist" id="showEmployees"><span style="color:var(--muted);font-size:.8rem">Connect first to load users.</span></div>
+      <p style="margin-top:.4rem"><button class="btn" id="btnEmpAll" type="button">Select all</button> <button class="btn" id="btnEmpNone" type="button">Clear all</button></p>
+      <div class="hint">Tick your team so the table isn't cluttered with other departments. Leave everything ticked to show all. This hides rows only — it doesn't change the overview totals.</div>
+    </div>
+
+    <div class="field">
+      <label>Comment tracking</label>
+      <label class="inline-check"><input type="checkbox" id="trackComments"> Count leads &amp; deals commented on (native timeline comments)</label>
+      <div class="hint">Counts <b>distinct records</b> — three comments on one client counts once. Covers every lead stage (including Junk/Inactive) and every deal stage (including Lost). Only the native right-side timeline box is trackable; the left-side comment field has no author or timestamp, so it can't be counted. Adds a scan of records modified in the period, so it's slower on long periods.</div>
+    </div>
+
+    <div class="field">
+      <label>"No Answer" lead stages</label>
+      <div class="checklist" id="noAnswerStages"><span style="color:var(--muted);font-size:.8rem">Connect first to load lead stages.</span></div>
+      <div class="hint">Used for the "of which No Answer" column. Reads the record's <b>current</b> stage, so a lead commented in the morning and moved later shows in its final stage.</div>
+    </div>
+
+    <div class="field">
+      <label>Funded deal stages</label>
+      <div class="checklist" id="fundedStages"><span style="color:var(--muted);font-size:.8rem">Connect first to load deal stages.</span></div>
+      <div class="hint">Tick every stage that means the client deposited. Everything else counts as opened / not funded.</div>
+    </div>
+
+    <div class="field">
+      <label for="weekStart">Week starts on</label>
+      <select id="weekStart"><option value="0">Sunday</option><option value="1">Monday</option></select>
+    </div>
+
+    <div class="note">
+      Every refresh calls the Bitrix24 REST API directly from your browser. Nothing is stored on any server. If your network blocks the calls, the fallback is a Bitrix export — but try this first.
+    </div>
+  </div>
+  <div class="foot">
+    <button class="btn primary" id="btnSave">Save & load data</button>
+    <button class="btn" onclick="closeDrawer()">Cancel</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================
+   Mubasher Capital — Derivatives Sales Dashboard (Bitrix24) v3
+   v3 fixes:
+   - Follow-ups on DEALS now counted (lead + deal activities)
+   - Completed Bitrix TASKS bound to leads/deals counted (needs 'task' scope)
+   - Follow-ups dated by COMPLETION time, not planned deadline
+   ========================================================= */
+
+const LS_KEY = 'mubasher_dash_cfg_v1';
+const STAGE_COLORS = ['#2E5AAC','#7A5AF8','#B45309','#0E7A5F','#B42318','#0E7A9F','#8A6D3B','#5B6B66','#6B21A8','#065F46'];
+const MAX_PAGES = 120;
+const FUP_CATS = [
+  {id:'call',    label:'Calls'},
+  {id:'meeting', label:'Meetings'},
+  {id:'todo',    label:'To-dos / tasks'},
+  {id:'email',   label:'Emails'},
+  {id:'chat',    label:'Open channel chats (WhatsApp sessions)'},
+  {id:'other',   label:'Other activity types'}
+];
+
+let cfg = {
+  webhook:'', campaignField:'', campaignFieldDeal:'', channelField:'SOURCE_ID',
+  fundedStages:[], weekStart:0,
+  fupCats:['call','meeting','todo'], fupOutgoing:false,
+  trackComments:true, noAnswerStages:[], callTarget:40,
+  showEmployees:[], prevCampaignField:'', campaignDateField:''
+};
+let meta = { leadStages:[], dealStages:[], sources:{}, users:{}, leadUF:[], dealUF:[], leadEnum:{}, dealEnum:{} };
+let data = { leads:[], deals:[], acts:[], comments:[], funded:[], leadById:{}, dealById:{},
+             cohort:{label:'', key:'', campaigns:[], leads:[], deals:[], loaded:false},
+             window:null, stats:null };
+let period = { key:'week', from:null, to:null };
+let focus = { campaigns:[], channel:'', source:'', employees:[] };
+let sortState = {};
+
+/* ---------------- helpers ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = n => (n||0).toLocaleString('en-US');
+const pct = (a,b) => b ? Math.round(a/b*1000)/10 + '%' : '—';
+function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
+function endOfDay(d){ const x=new Date(d); x.setHours(23,59,59,999); return x; }
+function startOfWeek(d){ const x=startOfDay(d); const diff=(x.getDay()-cfg.weekStart+7)%7; x.setDate(x.getDate()-diff); return x; }
+function startOfMonth(d){ const x=startOfDay(d); x.setDate(1); return x; }
+function toBx(d){ const p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
+function fmtRange(a,b){ const o={day:'numeric',month:'short'};
+  const s=a.toLocaleDateString('en-GB',o), e=b.toLocaleDateString('en-GB',o);
+  return s===e ? s : s+' – '+e; }
+function portalOrigin(){ try{ return new URL(cfg.webhook).origin; }catch(e){ return ''; } }
+
+/* ---------------- Bitrix REST ----------------
+   Bitrix throttles at roughly 2 req/sec. Exceeding it returns 503, and Bitrix's
+   error page carries no CORS headers — so throttling looks like a CORS block in
+   the console. We therefore queue requests with a minimum gap and retry 503/429
+   with exponential backoff.                                                    */
+const REQ_GAP_MS = 450;      // minimum spacing between requests
+const MAX_RETRIES = 4;
+let lastReqAt = 0;
+let reqChain = Promise.resolve();
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+async function throttle(){
+  const wait = Math.max(0, lastReqAt + REQ_GAP_MS - Date.now());
+  if(wait) await sleep(wait);
+  lastReqAt = Date.now();
+}
+async function bxRaw(method, params){
+  const url = cfg.webhook.replace(/\/+$/,'') + '/' + method + '.json';
+  const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(params)});
+  if(res.status===503 || res.status===429){ const e=new Error('THROTTLED'); e.throttled=true; throw e; }
+  if(!res.ok) throw new Error(method+' → HTTP '+res.status);
+  const j = await res.json();
+  if(j.error){
+    const msg = String(j.error_description||j.error);
+    if(/QUERY_LIMIT|too many/i.test(msg)){ const e=new Error('THROTTLED'); e.throttled=true; throw e; }
+    throw new Error(method+' → '+msg);
+  }
+  return j;
+}
+function bx(method, params={}){
+  // serialise every call through one chain so spacing is respected globally
+  const run = async () => {
+    let delay = 900;
+    for(let attempt=0; attempt<=MAX_RETRIES; attempt++){
+      await throttle();
+      try{
+        return await bxRaw(method, params);
+      }catch(e){
+        const isThrottle = e.throttled || /Failed to fetch|NetworkError|Load failed/i.test(e.message);
+        if(isThrottle && attempt < MAX_RETRIES){
+          setLoading('Portal busy — retrying in '+Math.round(delay/1000)+'s…');
+          await sleep(delay);
+          delay *= 2;
+          continue;
+        }
+        if(e.throttled) throw new Error(method+' → portal is rate-limiting (503). Narrow the period or turn off comment tracking, then retry.');
+        throw e;
+      }
+    }
+  };
+  reqChain = reqChain.then(run, run);
+  return reqChain;
+}
+async function bxAll(method, params={}, label=''){
+  let out=[], start=0, page=0;
+  for(;;){
+    setLoading(label ? label+' ('+out.length+')' : 'Loading…');
+    const j = await bx(method, {...params, start});
+    const r = j.result;
+    out = out.concat(Array.isArray(r) ? r : (r.tasks || r.items || []));
+    if(j.next === undefined || ++page >= MAX_PAGES) break;
+    start = j.next;
+  }
+  return out;
+}
+
+/* ---------------- config ---------------- */
+function loadCfg(){ try{ const s=localStorage.getItem(LS_KEY); if(s) cfg={...cfg, ...JSON.parse(s)}; }catch(e){} }
+function saveCfg(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(cfg)); }catch(e){} }
+
+/* ---------------- metadata ---------------- */
+function harvestFields(fieldsObj, enumStore){
+  const list=[];
+  Object.entries(fieldsObj).forEach(([k,v])=>{
+    if(k.indexOf('UF_CRM')!==0) return;
+    list.push({id:k, title:(v.listLabel||v.formLabel||v.title||k)});
+    if(v.type==='enumeration' && Array.isArray(v.items)){
+      enumStore[k]={};
+      v.items.forEach(it=>enumStore[k][String(it.ID)]=it.VALUE);
+    }
+  });
+  return list;
+}
+async function loadMeta(){
+  const statuses = await bxAll('crm.status.list', {}, 'Loading CRM stages');
+  meta.leadStages = statuses.filter(s=>s.ENTITY_ID==='STATUS')
+    .sort((a,b)=>+a.SORT-+b.SORT).map((s,i)=>({id:s.STATUS_ID,name:s.NAME,color:STAGE_COLORS[i%STAGE_COLORS.length]}));
+  meta.dealStages = statuses.filter(s=>s.ENTITY_ID && s.ENTITY_ID.indexOf('DEAL_STAGE')===0)
+    .sort((a,b)=>+a.SORT-+b.SORT).map(s=>({id:s.STATUS_ID,name:s.NAME}));
+  meta.sources = {};
+  statuses.filter(s=>s.ENTITY_ID==='SOURCE').forEach(s=>meta.sources[s.STATUS_ID]=s.NAME);
+
+  const users = await bxAll('user.get', {FILTER:{ACTIVE:true}}, 'Loading users');
+  meta.users = {};
+  users.forEach(u=>meta.users[u.ID]=((u.NAME||'')+' '+(u.LAST_NAME||'')).trim()||('User '+u.ID));
+
+  meta.leadEnum={}; meta.dealEnum={};
+  const lf = await bx('crm.lead.fields');
+  meta.leadUF = harvestFields(lf.result, meta.leadEnum);
+  const df = await bx('crm.deal.fields');
+  meta.dealUF = harvestFields(df.result, meta.dealEnum);
+}
+
+/* ---------------- value resolution ---------------- */
+function resolveVals(fieldId, raw, enumStore){
+  if(raw===null||raw===undefined||raw===''||raw===false) return [];
+  const arr = Array.isArray(raw) ? raw : [raw];
+  const map = enumStore[fieldId];
+  return arr.map(v=>{
+    if(v===null||v===undefined||v===''||v===false) return '';
+    const s=String(v);
+    if(s==='false'||s==='0') return '';        // Bitrix returns false for empty UF fields
+    return map && map[s] !== undefined ? map[s] : s;
+  }).filter(v=>v!=='');
+}
+function leadChannels(l){
+  if(cfg.channelField==='SOURCE_ID'){
+    return l.SOURCE_ID ? [meta.sources[l.SOURCE_ID]||l.SOURCE_ID] : [];
+  }
+  return resolveVals(cfg.channelField, l[cfg.channelField], meta.leadEnum);
+}
+
+/* ---------------- activity classification ---------------- */
+function classifyActivity(a){
+  const p=(a.PROVIDER_ID||'').toUpperCase();
+  const t=+a.TYPE_ID;
+  if(p.indexOf('CALL')>=0 || t===2) return 'call';
+  if(p.indexOf('EMAIL')>=0 || t===4) return 'email';
+  if(p.indexOf('OPENLINE')>=0) return 'chat';
+  if(p.indexOf('MEETING')>=0 || t===1) return 'meeting';
+  if(p.indexOf('TODO')>=0 || p.indexOf('TASK')>=0) return 'todo';
+  return 'other';
+}
+const CAT_LABEL = {call:'Call', email:'Email', chat:'Open channel', meeting:'Meeting', todo:'To-do', other:'Other'};
+function countable(a){
+  if(!cfg.fupCats.includes(a.cat)) return false;
+  if(cfg.fupOutgoing && String(a.dir)==='1') return false; // 1 = incoming
+  return true;
+}
+function actEntity(a){
+  if(a.owner.t==='deal') return data.dealById[a.owner.id];
+  if(a.owner.t==='lead') return data.leadById[a.owner.id];
+  return null; // contact/company: no campaign attribution available
+}
+
+/* ---------------- data window & loading ---------------- */
+function periodInLoadedWindow(){
+  if(!data.window || !period.from || !period.to) return false;
+  const TOL = 2000; // ignore sub-second differences between endOfDay values
+  const wantTo = Math.min(period.to.getTime(), Date.now());
+  return period.from.getTime() >= data.window.from.getTime() - TOL
+      && wantTo <= data.window.to.getTime() + TOL;
+}
+function neededWindow(){
+  const now = new Date();
+  let from = startOfMonth(now);
+  const ws = startOfWeek(now); if(ws<from) from=ws;
+  if(period.from && period.from<from) from = period.from;
+  let to = endOfDay(now);
+  if(period.to && period.to>to) to = period.to;
+  return {from,to};
+}
+function leadSelect(){
+  const sel = ['ID','STATUS_ID','SOURCE_ID','ASSIGNED_BY_ID','DATE_CREATE','TITLE'];
+  if(cfg.campaignField) sel.push(cfg.campaignField);
+  if(cfg.channelField && cfg.channelField!=='SOURCE_ID') sel.push(cfg.channelField);
+  if(cfg.prevCampaignField) sel.push(cfg.prevCampaignField);
+  if(cfg.campaignDateField) sel.push(cfg.campaignDateField);
+  return sel;
+}
+function dealSelect(){
+  const sel = ['ID','TITLE','STAGE_ID','ASSIGNED_BY_ID','SOURCE_ID','DATE_CREATE','LEAD_ID','OPPORTUNITY'];
+  if(cfg.campaignFieldDeal) sel.push(cfg.campaignFieldDeal);
+  return sel;
+}
+function sourceName(id){ return id ? (meta.sources[id]||String(id)) : ''; }
+function mapLead(l){
+  const cd = cfg.campaignDateField ? l[cfg.campaignDateField] : null;
+  return {
+    id:String(l.ID), title:l.TITLE||('Lead #'+l.ID), created:new Date(l.DATE_CREATE), stage:l.STATUS_ID,
+    assigned:l.ASSIGNED_BY_ID||'',
+    source: sourceName(l.SOURCE_ID),
+    campaigns: cfg.campaignField ? resolveVals(cfg.campaignField, l[cfg.campaignField], meta.leadEnum) : [],
+    prevCampaigns: cfg.prevCampaignField ? resolveVals(cfg.prevCampaignField, l[cfg.prevCampaignField], meta.leadEnum) : [],
+    campaignDate: (cd && String(cd).trim()) ? new Date(cd) : null,
+    channels: leadChannels(l)
+  };
+}
+function mapDeal(d){
+  return {
+    id:String(d.ID), title:d.TITLE||('Deal #'+d.ID), created:new Date(d.DATE_CREATE), stage:d.STAGE_ID,
+    assigned:d.ASSIGNED_BY_ID||'', leadId:d.LEAD_ID?String(d.LEAD_ID):'',
+    amount:parseFloat(d.OPPORTUNITY)||0, sourceRaw:d.SOURCE_ID||'',
+    source: sourceName(d.SOURCE_ID),
+    campaigns: cfg.campaignFieldDeal ? resolveVals(cfg.campaignFieldDeal, d[cfg.campaignFieldDeal], meta.dealEnum) : [],
+    prevCampaigns: [],
+    channels: [],
+    funded: cfg.fundedStages.includes(d.STAGE_ID)
+  };
+}
+const OWNER_T = {'1':'lead','2':'deal','3':'contact','4':'company','7':'quote','5':'invoice'};
+function ownerLabel(tid){ return OWNER_T[String(tid)] || ('type'+tid); }
+function mapActivity(a){
+  const p=(a.PROVIDER_ID||'').toUpperCase();
+  return {
+    id:'A'+a.ID,
+    doneAt:new Date(a.LAST_UPDATED || a.END_TIME),  // completion moment, not planned deadline
+    owner:{t:ownerLabel(a.OWNER_TYPE_ID), id:String(a.OWNER_ID||'')},
+    resp:a.RESPONSIBLE_ID||'',
+    cat:classifyActivity(a), dir:a.DIRECTION, subject:a.SUBJECT||'',
+    isTaskProvider:(p.indexOf('TASK')>=0), assoc:String(a.ASSOCIATED_ENTITY_ID||'')
+  };
+}
+
+async function loadActivities(w){
+  const select=['ID','OWNER_ID','OWNER_TYPE_ID','RESPONSIBLE_ID','END_TIME','LAST_UPDATED','TYPE_ID','PROVIDER_ID','DIRECTION','SUBJECT','ASSOCIATED_ENTITY_ID'];
+  // No OWNER_TYPE_ID filter: catches leads, deals, contacts, companies AND Smart
+  // Process Automation items. Also 4x fewer requests, which keeps us under the
+  // portal's rate limit.
+  const rows = await bxAll('crm.activity.list', {
+    order:{ID:'DESC'},
+    filter:{'>=LAST_UPDATED':toBx(w.from), '<=LAST_UPDATED':toBx(w.to), COMPLETED:'Y'},
+    select
+  }, 'Loading completed activities');
+  let acts = rows.map(mapActivity);
+
+  // Completed Bitrix TASKS bound to leads/deals (needs 'task' webhook scope)
+  const taskAssoc = new Set(acts.filter(a=>a.isTaskProvider && a.assoc).map(a=>a.assoc));
+  try{
+    const tasks = await bxAll('tasks.task.list', {
+      filter:{'>=CLOSED_DATE':toBx(w.from), '<=CLOSED_DATE':toBx(w.to), 'REAL_STATUS':5},
+      select:['ID','TITLE','RESPONSIBLE_ID','CLOSED_DATE','UF_CRM_TASK']
+    }, 'Loading completed tasks');
+    tasks.forEach(t=>{
+      const id=String(t.id||t.ID||'');
+      if(!id || taskAssoc.has(id)) return; // already counted as a CRM activity
+      const bind = t.ufCrmTask||t.UF_CRM_TASK||[];
+      const arr = Array.isArray(bind)?bind:[bind];
+      let owner=null;
+      for(const b of arr){
+        const s=String(b||'');
+        if(s.indexOf('L_')===0){ owner={t:'lead', id:s.slice(2)}; break; }
+        if(s.indexOf('D_')===0){ owner={t:'deal', id:s.slice(2)}; break; }
+      }
+      if(!owner) return; // task not bound to a lead/deal — not a client follow-up
+      acts.push({
+        id:'T'+id,
+        doneAt:new Date(t.closedDate||t.CLOSED_DATE),
+        owner, resp:String(t.responsibleId||t.RESPONSIBLE_ID||''),
+        cat:'todo', dir:null, subject:(t.title||t.TITLE||''), isTaskProvider:true, assoc:id
+      });
+    });
+    clearWarn();
+  }catch(e){
+    showWarn('Completed Bitrix tasks are not being counted: '+e.message+'. To include them, edit the inbound webhook and add the "Tasks (task)" permission, then refresh.');
+  }
+  return acts;
+}
+
+/* ---------------- timeline comments ----------------
+   Bitrix has no "all comments today" endpoint, so we:
+   1) list records MODIFIED in the window (cheap — only touched records change)
+   2) ask for their timeline comments in batches of 50 (one HTTP call per batch)
+   Only user-authored comments count. Distinct records, so 3 comments on one
+   client counts once.                                                        */
+async function bxBatch(cmds){
+  const j = await bx('batch', {halt:0, cmd:cmds});
+  return (j.result && j.result.result) || {};
+}
+function commentCmd(type, id, from){
+  return 'crm.timeline.comment.list?'+[
+    'filter[ENTITY_TYPE]='+type,
+    'filter[ENTITY_ID]='+encodeURIComponent(id),
+    'filter[>=CREATED]='+encodeURIComponent(toBx(from)),
+    'select[]=ID','select[]=CREATED','select[]=AUTHOR_ID','select[]=ENTITY_ID','select[]=COMMENT'
+  ].join('&');
+}
+async function loadComments(w){
+  if(!cfg.trackComments) return [];
+  const out=[];
+  // records touched during the window — a new comment updates the record's modify date
+  const modLeads = await bxAll('crm.lead.list', {
+    order:{DATE_MODIFY:'DESC'},
+    filter:{'>=DATE_MODIFY':toBx(w.from), '<=DATE_MODIFY':toBx(w.to)},
+    select:leadSelect()
+  }, 'Scanning leads for comments');
+  modLeads.forEach(l=>{ if(!data.leadById[String(l.ID)]) data.leadById[String(l.ID)]=mapLead(l); });
+
+  const modDeals = await bxAll('crm.deal.list', {
+    order:{DATE_MODIFY:'DESC'},
+    filter:{'>=DATE_MODIFY':toBx(w.from), '<=DATE_MODIFY':toBx(w.to)},
+    select:dealSelect()
+  }, 'Scanning deals for comments');
+  modDeals.forEach(d=>{ if(!data.dealById[String(d.ID)]) data.dealById[String(d.ID)]=mapDeal(d); });
+
+  const targets = modLeads.map(l=>({t:'lead', id:String(l.ID)}))
+    .concat(modDeals.map(d=>({t:'deal', id:String(d.ID)})));
+
+  const CAP = 4000;
+  if(targets.length > CAP){
+    showWarn('Comment tracking scanned the first '+CAP+' records modified in this period ('+targets.length+' total) to keep the portal responsive. Narrow the period for exact comment counts.');
+    targets.length = CAP;
+  }
+
+  for(let i=0;i<targets.length;i+=50){
+    setLoading('Reading comments ('+i+'/'+targets.length+')');
+    const chunk = targets.slice(i,i+50);
+    const cmds = {};
+    chunk.forEach((t,idx)=>{ cmds['c'+idx] = commentCmd(t.t, t.id, w.from); });
+    let res;
+    try{ res = await bxBatch(cmds); }
+    catch(e){
+      showWarn('Comments could not be read: '+e.message+'. Follow-up and pipeline numbers are unaffected.');
+      return out;
+    }
+    chunk.forEach((t,idx)=>{
+      const list = res['c'+idx];
+      if(!Array.isArray(list)) return;
+      list.forEach(c=>{
+        const created = new Date(c.CREATED);
+        if(!(created>=w.from && created<=w.to)) return;   // belt & braces
+        const author = String(c.AUTHOR_ID||'');
+        if(!author) return;                                // skip system entries
+        out.push({id:String(c.ID), created, author, entity:{t:t.t, id:t.id}, text:(c.COMMENT||'')});
+      });
+    });
+  }
+  return out;
+}
+
+/* ---------------- funding events ----------------
+   A deal funded today may have been CREATED months ago (dormant accounts, older
+   campaigns). Counting funded deals by creation date hides them entirely, so we
+   read Bitrix's stage history and count the moment a deal ENTERED a funded stage. */
+async function loadFundedEvents(w){
+  if(!cfg.fundedStages.length) return [];
+  let rows=[];
+  try{
+    rows = await bxAll('crm.stagehistory.list', {
+      entityTypeId:2,
+      order:{CREATED_TIME:'ASC'},
+      filter:{'>=CREATED_TIME':toBx(w.from), '<=CREATED_TIME':toBx(w.to)},
+      select:['ID','OWNER_ID','CREATED_TIME','STAGE_ID','STAGE_SEMANTIC_ID']
+    }, 'Loading funding events');
+  }catch(e){
+    // Older/self-hosted portals may not expose stage history — fall back to
+    // "currently funded and modified during the window".
+    const fb = await bxAll('crm.deal.list', {
+      order:{DATE_MODIFY:'DESC'},
+      filter:{'>=DATE_MODIFY':toBx(w.from), '<=DATE_MODIFY':toBx(w.to), STAGE_ID:cfg.fundedStages},
+      select:dealSelect().concat(['DATE_MODIFY'])
+    }, 'Loading funded deals');
+    showWarn('Stage history is unavailable on this portal, so "Funded" uses the deal\'s last-modified date instead of the exact funding moment. Counts may shift if a funded deal is edited later.');
+    const seen={};
+    fb.forEach(d=>{
+      const id=String(d.ID);
+      if(!data.dealById[id]) data.dealById[id]=mapDeal(d);
+      seen[id]={dealId:id, at:new Date(d.DATE_MODIFY), stage:d.STAGE_ID};
+    });
+    return Object.values(seen);
+  }
+  // keep only transitions INTO a stage we consider funded; one event per deal
+  const firstByDeal={};
+  rows.forEach(r=>{
+    const stage=r.STAGE_ID;
+    if(!cfg.fundedStages.includes(stage)) return;
+    const id=String(r.OWNER_ID||'');
+    if(!id) return;
+    const at=new Date(r.CREATED_TIME);
+    if(!firstByDeal[id] || at < firstByDeal[id].at) firstByDeal[id]={dealId:id, at, stage};
+  });
+  const events=Object.values(firstByDeal);
+  // pull any deals we don't already hold, so we can attribute them
+  const need=events.map(e=>e.dealId).filter(id=>!data.dealById[id]);
+  for(let i=0;i<need.length && i<2000;i+=50){
+    setLoading('Attributing funded deals ('+i+'/'+need.length+')');
+    const j = await bx('crm.deal.list', {filter:{ID:need.slice(i,i+50)}, select:dealSelect()});
+    (j.result||[]).forEach(d=>{ data.dealById[String(d.ID)]=mapDeal(d); });
+  }
+  return events;
+}
+
+async function loadData(){
+  const w = neededWindow();
+  const selLead = leadSelect();
+
+  const leads = await bxAll('crm.lead.list', {
+    order:{DATE_CREATE:'ASC'},
+    filter:{'>=DATE_CREATE':toBx(w.from), '<=DATE_CREATE':toBx(w.to)},
+    select:selLead
+  }, 'Loading leads');
+  data.leads = leads.map(mapLead);
+  data.leadById = {};
+  data.leads.forEach(l=>data.leadById[l.id]=l);
+
+  const deals = await bxAll('crm.deal.list', {
+    order:{DATE_CREATE:'ASC'},
+    filter:{'>=DATE_CREATE':toBx(w.from), '<=DATE_CREATE':toBx(w.to)},
+    select:dealSelect()
+  }, 'Loading deals');
+  data.deals = deals.map(mapDeal);
+  data.dealById = {};
+  data.deals.forEach(d=>data.dealById[d.id]=d);
+
+  data.acts = await loadActivities(w);
+
+  // deals referenced by activities but created before the window
+  const needDeals = new Set();
+  data.acts.forEach(a=>{ if(a.owner.t==='deal' && a.owner.id && !data.dealById[a.owner.id]) needDeals.add(a.owner.id); });
+  const dIds=[...needDeals];
+  for(let i=0;i<dIds.length && i<2000;i+=50){
+    setLoading('Attributing older deals ('+i+'/'+dIds.length+')');
+    const j = await bx('crm.deal.list', {filter:{ID:dIds.slice(i,i+50)}, select:dealSelect()});
+    (j.result||[]).forEach(d=>{ data.dealById[String(d.ID)]=mapDeal(d); });
+  }
+
+  // leads referenced by activities or deals but created before the window
+  const needLeads = new Set();
+  data.acts.forEach(a=>{ if(a.owner.t==='lead' && a.owner.id && !data.leadById[a.owner.id]) needLeads.add(a.owner.id); });
+  Object.values(data.dealById).forEach(d=>{ if(d.leadId && !data.leadById[d.leadId]) needLeads.add(d.leadId); });
+  const lIds=[...needLeads];
+  for(let i=0;i<lIds.length && i<2000;i+=50){
+    setLoading('Attributing older leads ('+i+'/'+lIds.length+')');
+    const j = await bx('crm.lead.list', {filter:{ID:lIds.slice(i,i+50)}, select:selLead});
+    (j.result||[]).forEach(l=>{ data.leadById[String(l.ID)]=mapLead(l); });
+  }
+
+  // deals inherit campaign/channel from originating lead when missing
+  Object.values(data.dealById).forEach(d=>{
+    const lead = d.leadId ? data.leadById[d.leadId] : null;
+    if(!d.campaigns.length && lead) d.campaigns = lead.campaigns;
+    if(lead && lead.prevCampaigns && lead.prevCampaigns.length) d.prevCampaigns = lead.prevCampaigns;
+    if(!d.source && lead) d.source = lead.source;
+    if(lead) d.channels = lead.channels;
+    else if(cfg.channelField==='SOURCE_ID' && d.sourceRaw) d.channels=[meta.sources[d.sourceRaw]||d.sourceRaw];
+  });
+
+  data.comments = await loadComments(w);
+  data.funded = await loadFundedEvents(w);
+
+  // remember exactly what range is in memory, so switching periods doesn't refetch
+  data.window = {from:w.from, to:w.to};
+  const respSet = new Set(data.acts.map(a=>a.resp).filter(Boolean));
+  data.stats = {
+    from:w.from, to:w.to,
+    leads:data.leads.length, deals:data.deals.length,
+    acts:data.acts.length, comments:data.comments.length, funded:data.funded.length,
+    responsibles:respSet.size,
+    actsNoResp:data.acts.filter(a=>!a.resp).length
+  };
+  // re-apply inheritance for any records newly pulled in by the comment or funding scans
+  Object.values(data.dealById).forEach(d=>{
+    const lead = d.leadId ? data.leadById[d.leadId] : null;
+    if(!d.campaigns.length && lead) d.campaigns = lead.campaigns;
+    if(lead && !d.channels.length) d.channels = lead.channels;
+    // a deal must inherit the lead's PREVIOUS campaigns too, otherwise filtering
+    // by an older campaign finds its leads but loses its deals and funding
+    if(lead && lead.prevCampaigns && lead.prevCampaigns.length) d.prevCampaigns = lead.prevCampaigns;
+    if(!d.source && lead) d.source = lead.source;
+  });
+}
+
+/* ---------------- slicing & aggregation ---------------- */
+function campaignsOf(e){
+  if(!e) return [];
+  return (e.campaigns||[]).concat(e.prevCampaigns||[]);
+}
+function entityMatchesFocus(e){
+  if(!e) return false;
+  // campaign match includes PREVIOUS campaign, so filtering by ETF still finds
+  // leads whose campaign name was later changed to a newer campaign
+  if(focus.campaigns.length && !campaignsOf(e).some(c=>focus.campaigns.includes(c))) return false;
+  if(focus.channel && !(e.channels||[]).includes(focus.channel)) return false;
+  if(focus.source && (e.source||'') !== focus.source) return false;
+  return true;
+}
+
+/* ---------------- campaign cohort (campaign-anchored, ignores period) ----------------
+   Answers "every lead ever tagged with this campaign", which is what the Bitrix
+   list filter shows — as opposed to the period-anchored KPIs above.            */
+function enumIdFor(fieldId, label){
+  const map = meta.leadEnum[fieldId];
+  if(!map) return label;                       // plain text field: filter by value
+  const hit = Object.entries(map).find(([,v])=>v===label);
+  return hit ? hit[0] : label;
+}
+function sourceIdFor(name){
+  const hit = Object.entries(meta.sources).find(([,v])=>v===name);
+  return hit ? hit[0] : name;
+}
+function cohortKey(){
+  return JSON.stringify([focus.campaigns.slice().sort(), focus.channel, focus.source]);
+}
+async function loadCohort(){
+  const hasSel = focus.campaigns.length || focus.channel || focus.source;
+  if(!hasSel){ data.cohort={label:'', key:'', campaigns:[], leads:[], deals:[], loaded:false}; return; }
+  const sel = leadSelect();
+  const seen = {};
+  const add = rows => rows.forEach(l=>{ seen[String(l.ID)] = mapLead(l); });
+
+  // Query whichever dimension is selected. When several are, we query the first
+  // and narrow the rest client-side, so combinations behave like an AND.
+  if(focus.campaigns.length && cfg.campaignField){
+    for(const campaign of focus.campaigns){
+      setLoading('Loading all leads for '+campaign+'…');
+      add(await bxAll('crm.lead.list', {order:{DATE_CREATE:'ASC'},
+        filter:{[cfg.campaignField]: enumIdFor(cfg.campaignField, campaign)}, select:sel}, 'Campaign leads'));
+      if(cfg.prevCampaignField){
+        add(await bxAll('crm.lead.list', {order:{DATE_CREATE:'ASC'},
+          filter:{[cfg.prevCampaignField]: enumIdFor(cfg.prevCampaignField, campaign)}, select:sel}, 'Previous-campaign leads'));
+      }
+    }
+  }else if(focus.channel){
+    setLoading('Loading all leads for '+focus.channel+'…');
+    const f = cfg.channelField==='SOURCE_ID'
+      ? {SOURCE_ID: sourceIdFor(focus.channel)}
+      : {[cfg.channelField]: enumIdFor(cfg.channelField, focus.channel)};
+    add(await bxAll('crm.lead.list', {order:{DATE_CREATE:'ASC'}, filter:f, select:sel}, 'Channel leads'));
+  }else if(focus.source){
+    setLoading('Loading all leads for '+focus.source+'…');
+    add(await bxAll('crm.lead.list', {order:{DATE_CREATE:'ASC'},
+      filter:{SOURCE_ID: sourceIdFor(focus.source)}, select:sel}, 'Source leads'));
+  }
+
+  // narrow by any other active focus dimension
+  const leads = Object.values(seen).filter(l=>entityMatchesFocus(l));
+  leads.forEach(l=>{ if(!data.leadById[l.id]) data.leadById[l.id]=l; });
+
+  // Pull the deals belonging to this cohort. Leads alone can't show account-opened
+  // or funded totals — those are deal stages.
+  const dealSeen = {};
+  const addDeals = rows => rows.forEach(d=>{
+    const dd = mapDeal(d);
+    const lead = dd.leadId ? (seen[dd.leadId] || data.leadById[dd.leadId]) : null;
+    if(!dd.campaigns.length && lead) dd.campaigns = lead.campaigns;
+    if(lead && lead.prevCampaigns && lead.prevCampaigns.length) dd.prevCampaigns = lead.prevCampaigns;
+    if(!dd.source && lead) dd.source = lead.source;
+    if(lead && !dd.channels.length) dd.channels = lead.channels;
+    dealSeen[dd.id] = dd;
+    if(!data.dealById[dd.id]) data.dealById[dd.id] = dd;
+  });
+  const ids = leads.map(l=>l.id);
+  for(let i=0;i<ids.length;i+=50){
+    setLoading('Loading deals ('+i+'/'+ids.length+')');
+    const j = await bx('crm.deal.list', {filter:{LEAD_ID:ids.slice(i,i+50)}, select:dealSelect()});
+    addDeals(j.result||[]);
+  }
+  if(focus.campaigns.length && cfg.campaignFieldDeal){
+    for(const campaign of focus.campaigns){
+      addDeals(await bxAll('crm.deal.list', {
+        filter:{[cfg.campaignFieldDeal]: enumIdFor(cfg.campaignFieldDeal, campaign)},
+        select:dealSelect()}, 'Campaign deals'));
+    }
+  }
+  const parts=[];
+  if(focus.campaigns.length) parts.push(focus.campaigns.join(' + '));
+  if(focus.channel) parts.push(focus.channel);
+  if(focus.source) parts.push(focus.source);
+  data.cohort = {label:parts.join(' · '), key:cohortKey(), campaigns:focus.campaigns.slice(),
+                 leads, deals:Object.values(dealSeen), loaded:true};
+}
+function cohortBreakdown(campaigns, leads, deals){
+  const list = Array.isArray(campaigns) ? campaigns : [campaigns];
+  const isCurrent = l => (l.campaigns||[]).some(c=>list.includes(c));
+  const b = {
+    total: leads.length,
+    current: 0, movedOn: 0,
+    paid: 0, manual: 0,
+    newForCampaign: 0, existingBefore: 0, undetermined: 0,
+    prevByName: {}, noPrev: 0,
+    stages: {},
+    dealStages: {}, dealTotal: 0, fundedTotal: 0, depositTotal: 0
+  };
+  leads.forEach(l=>{
+    if(isCurrent(l)) b.current++; else b.movedOn++;
+    if(l.campaignDate) b.paid++; else b.manual++;
+    if(l.campaignDate && !isNaN(l.campaignDate)){
+      const sameOrAfter = l.created >= startOfDay(l.campaignDate);
+      if(sameOrAfter) b.newForCampaign++; else b.existingBefore++;
+    }else if((l.prevCampaigns||[]).length){
+      b.existingBefore++;
+    }else{
+      b.undetermined++;
+    }
+    const prevs = (l.prevCampaigns||[]).filter(p=>!list.includes(p));
+    if(prevs.length) prevs.forEach(p=>b.prevByName[p]=(b.prevByName[p]||0)+1);
+    else b.noPrev++;
+    b.stages[l.stage]=(b.stages[l.stage]||0)+1;
+  });
+  (deals||[]).forEach(d=>{
+    b.dealTotal++;
+    b.dealStages[d.stage]=(b.dealStages[d.stage]||0)+1;
+    if(cfg.fundedStages.includes(d.stage)){ b.fundedTotal++; b.depositTotal += (d.amount||0); }
+  });
+  return b;
+}
+function commentEntity(c){
+  return c.entity.t==='deal' ? data.dealById[c.entity.id] : data.leadById[c.entity.id];
+}
+function isNoAnswer(e, t){
+  if(t!=='lead' || !e) return false;
+  if(cfg.noAnswerStages.length) return cfg.noAnswerStages.includes(e.stage);
+  const st = meta.leadStages.find(s=>s.id===e.stage);
+  return st ? /no\s*answer/i.test(st.name) : false;
+}
+function slice(from,to,useFocus){
+  const f = useFocus && (focus.campaigns.length||focus.channel||focus.source);
+  const emps = useFocus && focus.employees.length ? focus.employees : null;
+  const isEmp = id => !emps || emps.includes(id);
+  const L = data.leads.filter(l=>l.created>=from && l.created<=to && (!f || entityMatchesFocus(l)) && isEmp(l.assigned));
+  const D = data.deals.filter(d=>d.created>=from && d.created<=to && (!f || entityMatchesFocus(d)) && isEmp(d.assigned));
+  const A = data.acts.filter(a=>{
+    if(!(a.doneAt>=from && a.doneAt<=to)) return false;
+    if(!countable(a)) return false;
+    if(!isEmp(a.resp)) return false;
+    if(f) return entityMatchesFocus(actEntity(a));
+    return true;
+  });
+  // activities in range that were EXCLUDED by the type/direction settings —
+  // kept so the audit panel can explain any gap against Bitrix's own report
+  const X = data.acts.filter(a=>{
+    if(!(a.doneAt>=from && a.doneAt<=to)) return false;
+    if(countable(a)) return false;
+    if(!isEmp(a.resp)) return false;
+    if(f) return entityMatchesFocus(actEntity(a));
+    return true;
+  });
+  const C = data.comments.filter(c=>{
+    if(!(c.created>=from && c.created<=to)) return false;
+    if(!isEmp(c.author)) return false;
+    if(f) return entityMatchesFocus(commentEntity(c));
+    return true;
+  });
+  // deals that ENTERED a funded stage in this window, whenever they were created
+  const F = data.funded.filter(ev=>{
+    if(!(ev.at>=from && ev.at<=to)) return false;
+    const d = data.dealById[ev.dealId];
+    if(!isEmp(d?d.assigned:'')) return false;
+    if(f) return entityMatchesFocus(d);
+    return true;
+  });
+  return {L,D,A,X,C,F};
+}
+function summarize(s){
+  const stageCounts={};
+  s.L.forEach(l=>stageCounts[l.stage]=(stageCounts[l.stage]||0)+1);
+  const funded=(s.F||[]).length;              // entered a funded stage in this period
+  const nonFunded=s.D.filter(d=>!d.funded).length;  // created in period, not yet funded
+  // distinct records commented on
+  const cLeads=new Set(), cDeals=new Set(), cNoAns=new Set();
+  s.C.forEach(c=>{
+    const e=commentEntity(c);
+    if(c.entity.t==='deal') cDeals.add(c.entity.id);
+    else{ cLeads.add(c.entity.id); if(isNoAnswer(e,'lead')) cNoAns.add(c.entity.id); }
+  });
+  return { newLeads:s.L.length, followUps:s.A.length, deals:s.D.length,
+    funded, nonFunded, stageCounts,
+    cLeads:cLeads.size, cDeals:cDeals.size, commented:cLeads.size+cDeals.size, cNoAns:cNoAns.size };
+}
+function groupRows(s, keyFns, nameFn){
+  const map={};
+  const get=k=>{ if(!map[k]) map[k]={key:k,name:nameFn(k),leads:0,fups:0,deals:0,funded:0,notFunded:0,fundedList:[],
+    stages:{},audit:[],excluded:[],_cl:new Set(),_cd:new Set(),_cn:new Set(),cStages:{},commented:0,cLeads:0,cDeals:0,cNoAns:0}; return map[k]; };
+  s.L.forEach(l=>keyFns.lead(l).forEach(k=>{ const r=get(k); r.leads++; r.stages[l.stage]=(r.stages[l.stage]||0)+1; }));
+  s.A.forEach(a=>keyFns.act(a, actEntity(a)).forEach(k=>{ const r=get(k); r.fups++; r.audit.push(a); }));
+  if(s.X) s.X.forEach(a=>keyFns.act(a, actEntity(a)).forEach(k=>{ const r=get(k); r.excluded.push(a); }));
+  s.D.forEach(d=>keyFns.deal(d).forEach(k=>{ const r=get(k); r.deals++; if(!d.funded) r.notFunded++; }));
+  if(s.F) s.F.forEach(ev=>{
+    const d = data.dealById[ev.dealId];
+    const keys = keyFns.funded ? keyFns.funded(ev, d) : (d ? keyFns.deal(d) : []);
+    keys.forEach(k=>{ const r=get(k); r.funded++; r.fundedList.push(ev); });
+  });
+  if(keyFns.comment) s.C.forEach(c=>keyFns.comment(c, commentEntity(c)).forEach(k=>{
+    const r=get(k); const e=commentEntity(c);
+    if(c.entity.t==='deal') r._cd.add(c.entity.id);
+    else{ r._cl.add(c.entity.id); if(isNoAnswer(e,'lead')) r._cn.add(c.entity.id); }
+    const sid = e ? e.stage : '(unknown)';
+    r.cStages[sid]=r.cStages[sid]||new Set(); r.cStages[sid].add(c.entity.t+':'+c.entity.id);
+  }));
+  const rows=Object.values(map);
+  rows.forEach(r=>{
+    r.cLeads=r._cl.size; r.cDeals=r._cd.size; r.cNoAns=r._cn.size;
+    r.commented=r.cLeads+r.cDeals;
+  });
+  return rows;
+}
+const orBlank = arr => arr.length ? arr : [''];
+
+/* ---------------- rendering ---------------- */
+function stripHTML(stageCounts, total){
+  if(!total) return '<div class="strip" aria-hidden="true"><div class="seg" style="flex:1;background:#E5EAE8"></div></div>';
+  let segs='';
+  meta.leadStages.forEach(st=>{
+    const c=stageCounts[st.id]||0; if(!c) return;
+    segs += `<div class="seg" style="flex:${c};background:${st.color}" title="${esc(st.name)}: ${c} (${pct(c,total)})"></div>`;
+  });
+  Object.keys(stageCounts).forEach(id=>{
+    if(!meta.leadStages.find(s=>s.id===id))
+      segs += `<div class="seg" style="flex:${stageCounts[id]};background:#98A6A0" title="${esc(id)}: ${stageCounts[id]}"></div>`;
+  });
+  return '<div class="strip">'+segs+'</div>';
+}
+function legendHTML(stageCounts){
+  return '<div class="striplegend">'+meta.leadStages
+    .filter(st=>stageCounts[st.id])
+    .map(st=>`<span><i style="background:${st.color}"></i>${esc(st.name)} <b class="num">${fmt(stageCounts[st.id])}</b></span>`)
+    .join('')+'</div>';
+}
+function stageListHTML(stageCounts, total){
+  if(!total) return '';
+  const known = meta.leadStages.filter(st=>stageCounts[st.id])
+    .map(st=>({name:st.name, color:st.color, c:stageCounts[st.id]}));
+  const unknown = Object.keys(stageCounts)
+    .filter(id=>!meta.leadStages.find(s=>s.id===id))
+    .map(id=>({name:id, color:'#98A6A0', c:stageCounts[id]}));
+  return '<div class="stagelist">'+known.concat(unknown).map(s=>
+    `<div class="srow"><i style="background:${s.color}"></i><span class="sname">${esc(s.name)}</span><span class="sval num">${fmt(s.c)}</span><span class="spct num">${pct(s.c,total)}</span></div>`
+  ).join('')+'</div>';
+}
+
+function renderOverview(){
+  const now=new Date();
+  const windows=[
+    {t:'Daily', sub:now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}), from:startOfDay(now), to:endOfDay(now)},
+    {t:'Weekly', sub:fmtRange(startOfWeek(now),now), from:startOfWeek(now), to:endOfDay(now)},
+    {t:'Monthly', sub:now.toLocaleDateString('en-GB',{month:'long',year:'numeric'}), from:startOfMonth(now), to:endOfDay(now)}
+  ];
+  $('#ovgrid').innerHTML = windows.map(w=>{
+    const sm=summarize(slice(w.from,w.to,false));
+    return `<div class="ovcard">
+      <h3>${w.t} <em>${esc(w.sub)}</em></h3>
+      <div class="ovstats">
+        <div class="stat lead"><div class="v num">${fmt(sm.newLeads)}</div><div class="k">New leads</div></div>
+        <div class="stat fup"><div class="v num">${fmt(sm.followUps)}</div><div class="k">Follow-ups completed</div></div>
+        <div class="stat open"><div class="v num">${fmt(sm.nonFunded)}</div><div class="k">New deals, not funded</div></div>
+        <div class="stat funded"><div class="v num">${fmt(sm.funded)}</div><div class="k">Funded in period</div></div>
+      </div>
+      <div class="convline">Converted to deal: <b class="num">${fmt(sm.deals)}</b> · lead→deal <b>${pct(sm.deals,sm.newLeads)}</b> · deal→funded <b>${pct(sm.funded,sm.deals)}</b></div>
+      <div class="convline" style="border-top:none;padding-top:.15rem">Records commented: <b class="num">${fmt(sm.commented)}</b> <span style="font-size:.72rem">(${fmt(sm.cLeads)} leads · ${fmt(sm.cDeals)} deals)</span> · in No Answer <b class="num">${fmt(sm.cNoAns)}</b></div>
+      ${stripHTML(sm.stageCounts, sm.newLeads)}
+      ${stageListHTML(sm.stageCounts, sm.newLeads)}
+    </div>`;
+  }).join('');
+}
+
+function renderPipeline(sm){
+  const cells = meta.leadStages
+    .filter(st=>sm.stageCounts[st.id])
+    .map(st=>`<div class="stage-cell" style="border-top-color:${st.color}">
+        <div class="v num">${fmt(sm.stageCounts[st.id])}</div>
+        <div class="k">${esc(st.name)}</div>
+        <div class="k num">${pct(sm.stageCounts[st.id], sm.newLeads)}</div>
+      </div>`).join('');
+  $('#pipeCard').innerHTML = `
+    <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:baseline">
+      <span><span class="disp num" style="font-size:2rem;font-weight:700;color:var(--lead)">${fmt(sm.newLeads)}</span> <span style="font-size:.8rem;color:var(--muted)">leads received</span></span>
+      <span><span class="disp num" style="font-size:2rem;font-weight:700;color:var(--fup)">${fmt(sm.followUps)}</span> <span style="font-size:.8rem;color:var(--muted)">follow-ups completed</span></span>
+      <span><span class="disp num" style="font-size:2rem;font-weight:700;color:var(--open)">${fmt(sm.nonFunded)}</span> <span style="font-size:.8rem;color:var(--muted)">new deals, not funded</span></span>
+      <span><span class="disp num" style="font-size:2rem;font-weight:700;color:var(--funded)">${fmt(sm.funded)}</span> <span style="font-size:.8rem;color:var(--muted)">funded in period</span></span>
+    </div>
+    ${stripHTML(sm.stageCounts, sm.newLeads)}
+    ${legendHTML(sm.stageCounts)}
+    <div class="stage-cells">${cells || '<span style="color:var(--muted);font-size:.85rem">No leads created in this period.</span>'}</div>`;
+}
+
+function sortRows(rows, tbl){
+  const s=sortState[tbl]||{col:'leads',dir:-1};
+  return rows.slice().sort((a,b)=>{
+    const av=a[s.col], bv=b[s.col];
+    if(typeof av==='string') return s.dir * av.localeCompare(bv);
+    return s.dir * ((av||0)-(bv||0));
+  });
+}
+
+function commentedSplitHTML(r){
+  if(!r.commented) return '';
+  const rows=[];
+  meta.leadStages.forEach(st=>{
+    const set=r.cStages[st.id]; if(!set||!set.size) return;
+    rows.push({name:st.name, color:st.color, c:set.size});
+  });
+  meta.dealStages.forEach(st=>{
+    const set=r.cStages[st.id]; if(!set||!set.size) return;
+    rows.push({name:'Deal · '+st.name, color:'#0E7A9F', c:set.size});
+  });
+  Object.keys(r.cStages).forEach(id=>{
+    if(meta.leadStages.find(s=>s.id===id)||meta.dealStages.find(s=>s.id===id)) return;
+    rows.push({name:id, color:'#98A6A0', c:r.cStages[id].size});
+  });
+  return `<div style="margin-top:.7rem;border-top:1px dashed var(--line);padding-top:.5rem">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.35rem">
+      Commented records by current stage — ${fmt(r.commented)} total (${fmt(r.cLeads)} leads, ${fmt(r.cDeals)} deals)
+    </div>
+    <div class="stagelist" style="border-top:none;padding-top:0">${rows.map(s=>
+      `<div class="srow"><i style="background:${s.color}"></i><span class="sname">${esc(s.name)}</span><span class="sval num">${fmt(s.c)}</span><span class="spct num">${pct(s.c,r.commented)}</span></div>`
+    ).join('')}</div></div>`;
+}
+function fundedListHTML(r){
+  if(!r.fundedList || !r.fundedList.length) return '';
+  const origin = portalOrigin();
+  const rows = r.fundedList.slice().sort((a,b)=>b.at-a.at).slice(0,40).map(ev=>{
+    const d = data.dealById[ev.dealId];
+    const label = d ? d.title : ('Deal #'+ev.dealId);
+    const link = origin ? `<a href="${origin}/crm/deal/details/${esc(ev.dealId)}/" target="_blank" rel="noopener">${esc(label)}</a>` : esc(label);
+    const created = d ? d.created.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
+    return `<tr><td class="num">${ev.at.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${link}</td><td class="num">${esc(created)}</td>
+      <td>${d&&d.campaigns.length?esc(d.campaigns.join(', ')):'<span style="color:var(--muted)">—</span>'}</td>
+      <td>${d&&d.source?esc(d.source):'<span style="color:var(--muted)">no source</span>'}</td></tr>`;
+  }).join('');
+  return `<div style="margin-top:.7rem;border-top:1px dashed var(--line);padding-top:.5rem">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.35rem">Funded in this period — ${fmt(r.fundedList.length)}</div>
+    <table class="audit"><thead><tr><th>Funded at</th><th>Deal</th><th>Deal created</th><th>Campaign</th><th>Source</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+function defaultDetail(r){
+  const stageMini = meta.leadStages.filter(st=>r.stages[st.id])
+    .map(st=>`<span><i style="display:inline-block;width:.55rem;height:.55rem;border-radius:2px;background:${st.color};margin-right:.25rem;vertical-align:-1px"></i>${esc(st.name)} <b class="num">${fmt(r.stages[st.id])}</b></span>`).join(' &nbsp; ');
+  return stripHTML(r.stages, r.leads) +
+    `<div style="margin-top:.5rem;font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:.4rem 1rem">${stageMini||'No leads created in period.'}</div>` +
+    fundedListHTML(r) +
+    commentedSplitHTML(r);
+}
+function auditDetail(r){
+  const origin = portalOrigin();
+  // reconciliation: why our number may differ from Bitrix's own activity report
+  const exByCat={}, exIncoming=[];
+  (r.excluded||[]).forEach(a=>{
+    if(cfg.fupOutgoing && String(a.dir)==='1' && cfg.fupCats.includes(a.cat)){ exIncoming.push(a); return; }
+    exByCat[a.cat]=(exByCat[a.cat]||0)+1;
+  });
+  const exBits=Object.entries(exByCat).map(([c,n])=>`${n} ${CAT_LABEL[c]||c}`);
+  if(exIncoming.length) exBits.push(exIncoming.length+' incoming');
+  const totalAll = r.fups + (r.excluded||[]).length;
+  const recon = `<div style="margin-top:.7rem;border-top:1px dashed var(--line);padding-top:.5rem;font-size:.76rem;line-height:1.6">
+      <b>Reconciliation:</b> Bitrix has <b class="num">${fmt(totalAll)}</b> completed activities for this person in this period.
+      This dashboard counts <b class="num">${fmt(r.fups)}</b>.
+      ${exBits.length ? 'Excluded by your Settings: '+esc(exBits.join(' · '))+'.' : 'Nothing excluded.'}
+      ${exBits.length ? '<br><span style="color:var(--muted)">To match Bitrix exactly, tick every type under "What counts as a follow-up".</span>' : ''}
+    </div>`;
+  const acts = r.audit.slice().sort((a,b)=>b.doneAt-a.doneAt).slice(0,60);
+  const rows = acts.map(a=>{
+    const e = actEntity(a);
+    const path = a.owner.t;
+    const fallback = a.owner.t.charAt(0).toUpperCase()+a.owner.t.slice(1)+' #'+(a.owner.id||'—');
+    const label = e ? e.title : fallback;
+    const link = origin && a.owner.id
+      ? `<a href="${origin}/crm/${path}/details/${esc(a.owner.id)}/" target="_blank" rel="noopener">${esc(label)}</a>`
+      : esc(label);
+    return `<tr>
+      <td class="num">${a.doneAt.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+      <td><span class="cat ${a.cat}">${CAT_LABEL[a.cat]}</span>${String(a.dir)==='1'?' <span style="color:var(--muted);font-size:.7rem">incoming</span>':''}</td>
+      <td>${esc(a.subject)||'<span style="color:var(--muted)">—</span>'}</td>
+      <td><span class="ent">${esc(a.owner.t.toUpperCase())}</span>${link}${e&&e.campaigns&&e.campaigns.length?` <span style="color:var(--muted)">· ${esc(e.campaigns.join(', '))}</span>`:''}</td>
+    </tr>`;
+  }).join('');
+  return defaultDetail(r) + recon + (r.audit.length ?
+    `<table class="audit"><thead><tr><th>Completed</th><th>Type</th><th>Subject</th><th>Record</th></tr></thead><tbody>${rows}</tbody></table>` +
+    (r.audit.length>60?`<div style="font-size:.72rem;color:var(--muted);margin-top:.3rem">Showing latest 60 of ${r.audit.length} activities.</div>`:'')
+    : '<div style="font-size:.78rem;color:var(--muted);margin-top:.5rem">No counted follow-up activities in this period.</div>');
+}
+
+function renderGroupTable(tblId, rows, firstCol, detailFn){
+  detailFn = detailFn || defaultDetail;
+  const s=sortState[tblId]||{col:'leads',dir:-1};
+  const sorted = sortRows(rows, tblId);
+  const tot=sorted.reduce((t,r)=>({leads:t.leads+r.leads,fups:t.fups+r.fups,deals:t.deals+r.deals,funded:t.funded+r.funded}),{leads:0,fups:0,deals:0,funded:0});
+  const cols=[['name',firstCol],['leads','Leads received'],['fups','Follow-ups'],
+    ['commented','Commented'],['cNoAns','of which No Answer'],
+    ['deals','→ Deals'],['nonf','Open, not funded'],['funded','Funded in period'],['rate','Deals funded now']];
+  const NC = cols.length;
+  const head='<thead><tr>'+cols.map(([c,l])=>`<th data-col="${c}" class="${s.col===c?'sorted':''}">${l}</th>`).join('')+'</tr></thead>';
+  const body=sorted.map((r,i)=>`
+    <tr class="row" data-i="${i}" tabindex="0">
+      <td><span class="caret">▶</span>${esc(r.name)}</td>
+      <td class="num">${fmt(r.leads)}</td>
+      <td class="num">${fmt(r.fups)}</td>
+      <td class="num">${fmt(r.commented)} <span class="rate num">(${fmt(r.cLeads)}L/${fmt(r.cDeals)}D)</span></td>
+      <td class="num">${fmt(r.cNoAns)} <span class="rate num">${r.commented?'('+pct(r.cNoAns,r.commented)+')':''}</span></td>
+      <td class="num">${fmt(r.deals)} <span class="rate num">(${pct(r.deals,r.leads)})</span></td>
+      <td><span class="pill open num">${fmt(r.notFunded)}</span></td>
+      <td><span class="pill funded num">${fmt(r.funded)}</span></td>
+      <td class="num">${r.deals?pct(r.deals-r.notFunded,r.deals):'—'}</td>
+    </tr>
+    <tr class="detail" style="display:none"><td colspan="${NC}"></td></tr>`).join('');
+  const totC=sorted.reduce((t,r)=>({commented:t.commented+r.commented,cNoAns:t.cNoAns+r.cNoAns,cLeads:t.cLeads+r.cLeads,cDeals:t.cDeals+r.cDeals,notFunded:t.notFunded+r.notFunded}),{commented:0,cNoAns:0,cLeads:0,cDeals:0,notFunded:0});
+  const foot=`<tfoot><tr><td>Total (${sorted.length})</td><td class="num">${fmt(tot.leads)}</td><td class="num">${fmt(tot.fups)}</td><td class="num">${fmt(totC.commented)} <span class="rate num">(${fmt(totC.cLeads)}L/${fmt(totC.cDeals)}D)</span></td><td class="num">${fmt(totC.cNoAns)}</td><td class="num">${fmt(tot.deals)}</td><td class="num">${fmt(totC.notFunded)}</td><td class="num">${fmt(tot.funded)}</td><td class="num">${tot.deals?pct(tot.deals-totC.notFunded,tot.deals):'—'}</td></tr></tfoot>`;
+  const tbl=$('#'+tblId);
+  tbl.innerHTML = head+'<tbody>'+ (body||`<tr><td colspan="${NC}" style="text-align:center;color:var(--muted)">Nothing in this period.</td></tr>`) +'</tbody>'+foot;
+
+  tbl.querySelectorAll('thead th').forEach(th=>th.addEventListener('click',()=>{
+    const col=th.dataset.col==='nonf'?'deals':(th.dataset.col==='rate'?'funded':th.dataset.col);
+    const cur=sortState[tblId]||{col:'leads',dir:-1};
+    sortState[tblId]={col, dir: cur.col===col ? -cur.dir : (col==='name'?1:-1)};
+    renderGroupTable(tblId, rows, firstCol, detailFn);
+  }));
+  tbl.querySelectorAll('tr.row').forEach(tr=>{
+    const toggle=()=>{
+      const d=tr.nextElementSibling;
+      const open=d.style.display!=='none';
+      if(open){ d.style.display='none'; }
+      else{
+        const r=sorted[+tr.dataset.i];
+        d.firstElementChild.innerHTML = detailFn(r);
+        d.style.display='';
+      }
+      tr.classList.toggle('open',!open);
+    };
+    tr.addEventListener('click',e=>{ if(e.target.closest('a')) return; toggle(); });
+    tr.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();} });
+  });
+}
+
+function renderDaily(){
+  const on = focusActive();
+  $('#secDaily').style.display = on ? '' : 'none';
+  if(!on) return;
+  const rows=[]; let d=new Date(period.from);
+  let guard=0;
+  while(d<=period.to && guard++<62){
+    const s=slice(startOfDay(d), endOfDay(d), true);
+    const sm=summarize(s);
+    rows.push({date:new Date(d), ...sm});
+    d.setDate(d.getDate()+1);
+  }
+  const body=rows.map(r=>`<tr>
+    <td>${r.date.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'})}</td>
+    <td class="num">${fmt(r.newLeads)}</td>
+    <td class="num">${fmt(r.followUps)}</td>
+    <td class="num">${fmt(r.commented)}</td>
+    <td class="num">${fmt(r.cNoAns)}</td>
+    <td class="num">${fmt(r.deals)}</td>
+    <td><span class="pill open num">${fmt(r.nonFunded)}</span></td>
+    <td><span class="pill funded num">${fmt(r.funded)}</span></td>
+  </tr>`).join('');
+  const t=rows.reduce((a,r)=>({newLeads:a.newLeads+r.newLeads,followUps:a.followUps+r.followUps,commented:a.commented+r.commented,cNoAns:a.cNoAns+r.cNoAns,deals:a.deals+r.deals,nonFunded:a.nonFunded+r.nonFunded,funded:a.funded+r.funded}),{newLeads:0,followUps:0,commented:0,cNoAns:0,deals:0,nonFunded:0,funded:0});
+  $('#tblDaily').innerHTML = `<thead><tr><th style="cursor:default">Day</th><th style="cursor:default">Leads</th><th style="cursor:default">Follow-ups</th><th style="cursor:default">Commented</th><th style="cursor:default">No Answer</th><th style="cursor:default">→ Deals</th><th style="cursor:default">Not funded</th><th style="cursor:default">Funded in period</th></tr></thead>
+    <tbody>${body}</tbody>
+    <tfoot><tr><td>Total</td><td class="num">${fmt(t.newLeads)}</td><td class="num">${fmt(t.followUps)}</td><td class="num">${fmt(t.commented)}</td><td class="num">${fmt(t.cNoAns)}</td><td class="num">${fmt(t.deals)}</td><td class="num">${fmt(t.nonFunded)}</td><td class="num">${fmt(t.funded)}</td></tr></tfoot>`;
+}
+
+function focusSuffix(){
+  const parts=[];
+  if(focus.campaigns.length===1) parts.push(focus.campaigns[0]);
+  else if(focus.campaigns.length>1) parts.push(focus.campaigns.length+' campaigns');
+  if(focus.channel) parts.push(focus.channel);
+  if(focus.source) parts.push(focus.source);
+  if(focus.employees.length===1) parts.push(meta.users[focus.employees[0]]||('User '+focus.employees[0]));
+  else if(focus.employees.length>1) parts.push(focus.employees.length+' employees');
+  return parts.length ? ' · '+parts.join(' · ') : '';
+}
+function focusActive(){ return !!(focus.campaigns.length||focus.channel||focus.source||focus.employees.length); }
+
+function renderDiagnostics(){
+  const el=$('#diagbar');
+  if(!data.stats){ el.style.display='none'; return; }
+  const s=data.stats;
+  // unfiltered activity count per responsible, straight from the raw pull
+  const byUser={};
+  data.acts.forEach(a=>{ const k=a.resp||'(none)'; byUser[k]=(byUser[k]||0)+1; });
+  const list=Object.entries(byUser).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`${esc(meta.users[k]||(k==='(none)'?'no responsible':'User '+k))}: <b>${v}</b>`).join(' · ');
+  const hidden = cfg.showEmployees.length
+    ? Object.keys(byUser).filter(k=>k!=='(none)' && !cfg.showEmployees.includes(k))
+        .map(k=>meta.users[k]||('User '+k))
+    : [];
+  el.innerHTML = `<b style="color:var(--ink)">Loaded from Bitrix:</b> ${fmtRange(s.from,s.to)} ·
+    ${fmt(s.leads)} leads created · ${fmt(s.acts)} completed activities · ${fmt(s.comments)} comments ·
+    ${fmt(s.funded)} funding events · ${fmt(s.deals)} deals created
+    ${s.actsNoResp?` · <span style="color:var(--open)">${fmt(s.actsNoResp)} activities have no responsible person</span>`:''}
+    <br><b style="color:var(--ink)">Activities per person (unfiltered, all types):</b> ${list||'none'}
+    ${hidden.length?`<br><span style="color:var(--open)"><b>Hidden by your employee filter:</b> ${esc(hidden.join(', '))} — untick in Settings to show.</span>`:''}`;
+  el.style.display='';
+}
+
+function renderCohort(){
+  const on = !!(data.cohort.loaded && data.cohort.key===cohortKey());
+  $('#secCohort').style.display = on ? '' : 'none';
+  if(!on) return;
+  const c = data.cohort;
+  const b = cohortBreakdown(c.campaigns||[], c.leads, c.deals||[]);
+  $('#cohortName').textContent = c.label;
+
+  const isCamp = (c.campaigns||[]).length>0;
+  const big = (v,l,col)=>`<span><span class="disp num" style="font-size:2rem;font-weight:700;color:${col}">${fmt(v)}</span> <span style="font-size:.8rem;color:var(--muted)">${l}</span></span>`;
+  const prevRows = Object.entries(b.prevByName).sort((a,b2)=>b2[1]-a[1])
+    .map(([n,v])=>`<div class="srow"><i style="background:var(--fup)"></i><span class="sname">${esc(n)}</span><span class="sval num">${fmt(v)}</span><span class="spct num">${pct(v,b.total)}</span></div>`).join('');
+
+  const dateNote = cfg.campaignDateField ? '' :
+    '<div style="font-size:.74rem;color:var(--open);margin-top:.4rem">Map the <b>Campaign date field</b> in Settings to split new vs existing accurately.</div>';
+
+  // stage boxes, same format as the pipeline section
+  const cellFor = (name, count, total, color) =>
+    `<div class="stage-cell" style="border-top-color:${color}">
+        <div class="v num">${fmt(count)}</div>
+        <div class="k">${esc(name)}</div>
+        <div class="k num">${pct(count,total)}</div>
+      </div>`;
+  const leadCells = meta.leadStages.filter(st=>b.stages[st.id])
+    .map(st=>cellFor(st.name, b.stages[st.id], b.total, st.color)).join('');
+  const DEAL_COLORS=['#B45309','#0E7A9F','#0E7A5F','#B42318','#8A6D3B','#6B21A8'];
+  const dealCells = meta.dealStages.filter(st=>b.dealStages[st.id])
+    .map((st,i)=>cellFor(st.name, b.dealStages[st.id], b.dealTotal,
+        cfg.fundedStages.includes(st.id) ? 'var(--funded)' : DEAL_COLORS[i%DEAL_COLORS.length])).join('')
+    + Object.keys(b.dealStages).filter(id=>!meta.dealStages.find(s=>s.id===id))
+        .map(id=>cellFor(id, b.dealStages[id], b.dealTotal, '#98A6A0')).join('');
+
+  $('#cohortCard').innerHTML = `
+    <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:baseline">
+      ${big(b.total,'total leads in this selection','var(--lead)')}
+      ${isCamp?big(b.current,'campaign name = selected','var(--ink)'):''}
+      ${isCamp?big(b.movedOn,'moved to a newer campaign','var(--fup)'):''}
+    </div>
+
+    ${isCamp?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-top:1rem">
+
+      <div style="border:1px solid var(--line);border-radius:9px;padding:.7rem .8rem">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.4rem">New vs existing in CRM</div>
+        <div class="stagelist" style="border-top:none;padding-top:0">
+          <div class="srow"><i style="background:var(--funded)"></i><span class="sname">New — arrived with this campaign</span><span class="sval num">${fmt(b.newForCampaign)}</span><span class="spct num">${pct(b.newForCampaign,b.total)}</span></div>
+          <div class="srow"><i style="background:var(--open)"></i><span class="sname">Existing — already in CRM before</span><span class="sval num">${fmt(b.existingBefore)}</span><span class="spct num">${pct(b.existingBefore,b.total)}</span></div>
+          ${b.undetermined?`<div class="srow"><i style="background:#98A6A0"></i><span class="sname">Can't tell — no campaign date, no previous campaign</span><span class="sval num">${fmt(b.undetermined)}</span><span class="spct num">${pct(b.undetermined,b.total)}</span></div>`:''}
+        </div>
+        ${dateNote}
+      </div>
+
+      <div style="border:1px solid var(--line);border-radius:9px;padding:.7rem .8rem">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.4rem">Paid campaign vs added by sales team</div>
+        <div class="stagelist" style="border-top:none;padding-top:0">
+          <div class="srow"><i style="background:var(--lead)"></i><span class="sname">Has campaign date — from the paid campaign</span><span class="sval num">${fmt(b.paid)}</span><span class="spct num">${pct(b.paid,b.total)}</span></div>
+          <div class="srow"><i style="background:#8A6D3B"></i><span class="sname">No campaign date — entered by sales team</span><span class="sval num">${fmt(b.manual)}</span><span class="spct num">${pct(b.manual,b.total)}</span></div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--line);border-radius:9px;padding:.7rem .8rem">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.4rem">Came from a previous campaign</div>
+        <div class="stagelist" style="border-top:none;padding-top:0">
+          ${prevRows || '<div style="font-size:.78rem;color:var(--muted);padding:.2rem 0">None recorded.</div>'}
+          <div class="srow"><i style="background:#98A6A0"></i><span class="sname">No previous campaign recorded</span><span class="sval num">${fmt(b.noPrev)}</span><span class="spct num">${pct(b.noPrev,b.total)}</span></div>
+        </div>
+      </div>
+
+    </div>`:''}
+
+    <div style="margin-top:1rem">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.35rem">Current lead stage — all ${fmt(b.total)} leads</div>
+      ${stripHTML(b.stages, b.total)}
+      ${stageListHTML(b.stages, b.total)}
+      <div class="stage-cells">${leadCells || '<span style="color:var(--muted);font-size:.85rem">No leads.</span>'}</div>
+    </div>
+
+    <div style="margin-top:1.1rem;border-top:1px solid var(--line);padding-top:.8rem">
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:baseline;margin-bottom:.5rem">
+        ${big(b.dealTotal,'deals created from this selection','var(--open)')}
+        ${big(b.fundedTotal,'funded','var(--funded)')}
+        <span><span class="disp num" style="font-size:1.4rem;font-weight:700">${b.total?pct(b.dealTotal,b.total):'—'}</span> <span style="font-size:.8rem;color:var(--muted)">lead → deal</span></span>
+        <span><span class="disp num" style="font-size:1.4rem;font-weight:700">${b.dealTotal?pct(b.fundedTotal,b.dealTotal):'—'}</span> <span style="font-size:.8rem;color:var(--muted)">deal → funded</span></span>
+        <span><span class="disp num" style="font-size:1.4rem;font-weight:700">${b.total?pct(b.fundedTotal,b.total):'—'}</span> <span style="font-size:.8rem;color:var(--muted)">lead → funded</span></span>
+      </div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.35rem">Current deal stage — all ${fmt(b.dealTotal)} deals</div>
+      <div class="stage-cells">${dealCells || '<span style="color:var(--muted);font-size:.85rem">No deals yet from this campaign.</span>'}</div>
+    </div>`;
+}
+
+function renderBreakdowns(){
+  const s = slice(period.from, period.to, true);
+  const sm = summarize(s);
+  const title = fmtRange(period.from, period.to) + focusSuffix();
+  ['pTitle1','pTitle2','pTitle3','pTitle3b','pTitle4','pTitleD'].forEach(id=>{ const el=$('#'+id); if(el) el.textContent=title; });
+  $('#focusbar').classList.toggle('focus-on', focusActive());
+
+  renderCohort();
+  renderPipeline(sm);
+  renderDaily();
+
+  const noCamp = cfg.campaignField ? '(no campaign set)' : '(map the campaign field in Settings)';
+  renderGroupTable('tblCampaign', groupRows(s, {
+    lead:l=>orBlank(l.campaigns),
+    act:(a,e)=>orBlank(e?e.campaigns:[]),
+    deal:d=>orBlank(d.campaigns),
+    comment:(c,e)=>orBlank(e?e.campaigns:[]),
+    funded:(ev,d)=>orBlank(d?d.campaigns:[])
+  }, k=>k||noCamp), 'Campaign');
+
+  const noChan = '(no channel set)';
+  renderGroupTable('tblChannel', groupRows(s, {
+    lead:l=>orBlank(l.channels),
+    act:(a,e)=>orBlank(e?e.channels:[]),
+    deal:d=>orBlank(d.channels),
+    comment:(c,e)=>orBlank(e?e.channels:[]),
+    funded:(ev,d)=>orBlank(d?d.channels:[])
+  }, k=>k||noChan), 'Sales channel');
+
+  renderGroupTable('tblSource', groupRows(s, {
+    lead:l=>[l.source||''],
+    act:(a,e)=>[e?(e.source||''):''],
+    deal:d=>[d.source||''],
+    comment:(c,e)=>[e?(e.source||''):''],
+    funded:(ev,d)=>[d?(d.source||''):'']
+  }, k=>k||'(no source set)'), 'Lead source');
+
+  const empRows = groupRows(s, {
+    lead:l=>[l.assigned], act:a=>[a.resp], deal:d=>[d.assigned],
+    comment:c=>[c.author],
+    funded:(ev,d)=>[d?d.assigned:'']
+  }, k=>meta.users[k]||(k?('User '+k):'Unassigned'))
+    .filter(r=>r.key)
+    .filter(r=>!cfg.showEmployees.length || cfg.showEmployees.includes(r.key));
+  renderGroupTable('tblEmployee', empRows, 'Employee', auditDetail);
+}
+
+function updateCampBtn(){
+  const n = focus.campaigns.length, btn = $('#focusCampBtn');
+  if(!btn) return;
+  btn.textContent = !n ? 'All campaigns' : (n===1 ? focus.campaigns[0] : n+' campaigns selected');
+}
+async function refreshCohort(){
+  renderBreakdowns();                         // instant, period-based
+  if(focus.campaigns.length || focus.channel || focus.source){
+    try{
+      await loadCohort();                     // then all-time totals
+      renderBreakdowns();
+    }catch(err){
+      showWarn('Could not load all-time totals: '+err.message);
+    }
+    setLoading(false);
+  }else{
+    data.cohort={label:'', key:'', campaigns:[], leads:[], deals:[], loaded:false};
+    renderBreakdowns();
+  }
+}
+async function onCampaignFocusChange(){
+  focus.campaigns = [...$('#focusCampList').querySelectorAll('input:checked')].map(i=>i.value);
+  updateCampBtn();
+  await refreshCohort();
+}
+function fillFocusOptions(){
+  const camps={}, chans={}, srcs={}, emps={};
+  // Draw from EVERY record the dashboard holds — including older leads and deals
+  // pulled in for attribution — otherwise a campaign or channel that only exists
+  // on older records never appears in the dropdown.
+  const allLeads = Object.values(data.leadById);
+  const allDeals = Object.values(data.dealById);
+  const bump=(map,k)=>{ if(k) map[k]=(map[k]||0)+1; };
+  allLeads.forEach(l=>{
+    (l.campaigns||[]).forEach(c=>bump(camps,c));
+    (l.prevCampaigns||[]).forEach(c=>{ if(!camps[c]) camps[c]=0; });
+    (l.channels||[]).forEach(c=>bump(chans,c));
+    bump(srcs, l.source);
+    if(l.assigned && !emps[l.assigned]) emps[l.assigned]=0;
+  });
+  allDeals.forEach(d=>{
+    (d.campaigns||[]).forEach(c=>{ if(!camps[c]) camps[c]=0; });
+    (d.channels||[]).forEach(c=>{ if(!chans[c]) chans[c]=0; });
+    if(d.source && !srcs[d.source]) srcs[d.source]=0;
+  });
+  data.acts.forEach(a=>{ if(a.resp) emps[a.resp]=(emps[a.resp]||0)+1; });
+  data.comments.forEach(c=>{ if(c.author && !emps[c.author]) emps[c.author]=0; });
+
+  const opt=(map,current,allLabel)=>'<option value="">'+allLabel+'</option>'+
+    Object.entries(map).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0]))
+    .map(([k,v])=>`<option value="${esc(k)}" ${k===current?'selected':''}>${esc(k)}${v?' ('+v+')':''}</option>`).join('');
+  $('#focusCampList').innerHTML = Object.entries(camps)
+    .sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0]))
+    .map(([k,v])=>`<label><input type="checkbox" value="${esc(k)}" ${focus.campaigns.includes(k)?'checked':''}> ${esc(k)} <span class="cnt">${v||''}</span></label>`)
+    .join('') || '<div style="font-size:.78rem;color:var(--muted);padding:.3rem">No campaigns found.</div>';
+  $('#focusCampList').querySelectorAll('input').forEach(inp=>inp.addEventListener('change', onCampaignFocusChange));
+  updateCampBtn();
+  $('#focusChannel').innerHTML  = opt(chans, focus.channel, 'All sales channels');
+  $('#focusSource').innerHTML   = opt(srcs,  focus.source,  'All lead sources');
+  // employees: multi-select checkbox panel, filters instantly with no refetch
+  const empOpts = Object.keys(emps)
+    .filter(id=>!cfg.showEmployees.length || cfg.showEmployees.includes(id))
+    .map(id=>({id, name:meta.users[id]||('User '+id), n:emps[id]}))
+    .sort((a,b)=>a.name.localeCompare(b.name));
+  $('#focusEmpList').innerHTML = empOpts.map(e=>
+    `<label><input type="checkbox" value="${esc(e.id)}" ${focus.employees.includes(e.id)?'checked':''}> ${esc(e.name)} <span class="cnt">${e.n}</span></label>`
+  ).join('') || '<div style="font-size:.78rem;color:var(--muted);padding:.3rem">No activity in this period.</div>';
+  $('#focusEmpList').querySelectorAll('input').forEach(inp=>inp.addEventListener('change', ()=>{
+    focus.employees = [...$('#focusEmpList').querySelectorAll('input:checked')].map(i=>i.value);
+    updateEmpBtn();
+    renderBreakdowns();
+  }));
+  updateEmpBtn();
+}
+function updateEmpBtn(){
+  const n = focus.employees.length;
+  const btn = $('#focusEmpBtn');
+  if(!btn) return;
+  if(!n){ btn.textContent = 'All employees'; return; }
+  if(n===1){ btn.textContent = meta.users[focus.employees[0]] || ('User '+focus.employees[0]); return; }
+  btn.textContent = n+' employees selected';
+}
+
+function renderAll(){
+  $('#empty').style.display='none';
+  $('#dash').style.display='';
+  renderOverview();
+  renderDiagnostics();
+  fillFocusOptions();
+  renderBreakdowns();
+  $('#lastUpdated').textContent='Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* ---------------- periods ---------------- */
+function setPeriod(key){
+  const now=new Date();
+  period.key=key;
+  if(key==='today'){ period.from=startOfDay(now); period.to=endOfDay(now); }
+  else if(key==='yesterday'){ const y=new Date(now); y.setDate(y.getDate()-1); period.from=startOfDay(y); period.to=endOfDay(y); }
+  else if(key==='week'){ period.from=startOfWeek(now); period.to=endOfDay(now); }
+  else if(key==='lastweek'){ const s=startOfWeek(now); s.setDate(s.getDate()-7); const e=new Date(s); e.setDate(e.getDate()+6); period.from=s; period.to=endOfDay(e); }
+  else if(key==='month'){ period.from=startOfMonth(now); period.to=endOfDay(now); }
+  else if(key==='lastmonth'){ const s=startOfMonth(now); s.setMonth(s.getMonth()-1); const e=new Date(startOfMonth(now)); e.setDate(0); period.from=s; period.to=endOfDay(e); }
+  document.querySelectorAll('.chipbtn[data-p]').forEach(b=>b.classList.toggle('active',b.dataset.p===key));
+}
+
+/* ---------------- UI wiring ---------------- */
+function setLoading(txt){ const el=$('#loading'); if(txt===false){el.style.display='none';return;} el.textContent=txt; el.style.display='block'; }
+function showError(msg){ const e=$('#errbar'); e.innerHTML=esc(msg); e.style.display='block'; }
+function clearError(){ $('#errbar').style.display='none'; }
+function showWarn(msg){ const e=$('#warnbar'); e.innerHTML=esc(msg); e.style.display='block'; }
+function clearWarn(){ $('#warnbar').style.display='none'; }
+
+function openDrawer(){ $('#drawer').classList.add('show'); $('#drawerBg').classList.add('show'); fillSettingsUI(); }
+function closeDrawer(){ $('#drawer').classList.remove('show'); $('#drawerBg').classList.remove('show'); }
+
+function fillSettingsUI(){
+  $('#whUrl').value=cfg.webhook;
+  $('#weekStart').value=String(cfg.weekStart);
+  const fill=(sel,list,current,emptyLabel,keepFirst)=>{
+    const first = keepFirst ? sel.querySelector('option').outerHTML : '<option value="">'+emptyLabel+'</option>';
+    sel.innerHTML=first+list.map(f=>`<option value="${esc(f.id)}" ${f.id===current?'selected':''}>${esc(f.title)} (${esc(f.id)})</option>`).join('');
+    if(keepFirst) sel.value=current||'SOURCE_ID';
+  };
+  fill($('#fCampaign'), meta.leadUF, cfg.campaignField, meta.leadUF.length?'— select field —':'— connect first —');
+  fill($('#fCampaignDeal'), meta.dealUF, cfg.campaignFieldDeal, '— read through the originating lead —');
+  fill($('#fPrevCampaign'), meta.leadUF, cfg.prevCampaignField, '— none —');
+  fill($('#fCampaignDate'), meta.leadUF, cfg.campaignDateField, '— none —');
+  fill($('#fChannel'), meta.leadUF, cfg.channelField, null, true);
+
+  $('#fupCats').innerHTML = FUP_CATS.map(c=>
+    `<label><input type="checkbox" value="${c.id}" ${cfg.fupCats.includes(c.id)?'checked':''}> ${esc(c.label)}</label>`).join('');
+  $('#fupOutgoing').checked = !!cfg.fupOutgoing;
+
+  $('#trackComments').checked = cfg.trackComments!==false;
+  const empBox=$('#showEmployees');
+  const userList=Object.entries(meta.users).sort((a,b)=>a[1].localeCompare(b[1]));
+  if(userList.length){
+    empBox.innerHTML = userList.map(([id,name])=>{
+      const checked = cfg.showEmployees.length ? cfg.showEmployees.includes(id) : true;
+      return `<label><input type="checkbox" value="${esc(id)}" ${checked?'checked':''}> ${esc(name)}</label>`;
+    }).join('');
+  }
+  const naBox=$('#noAnswerStages');
+  if(meta.leadStages.length){
+    naBox.innerHTML = meta.leadStages.map(st=>{
+      const checked = cfg.noAnswerStages.length
+        ? cfg.noAnswerStages.includes(st.id)
+        : /no\s*answer/i.test(st.name);
+      return `<label><input type="checkbox" value="${esc(st.id)}" ${checked?'checked':''}> ${esc(st.name)} <span style="color:var(--muted)">(${esc(st.id)})</span></label>`;
+    }).join('');
+  }
+
+  const box=$('#fundedStages');
+  if(meta.dealStages.length){
+    box.innerHTML = meta.dealStages.map(st=>{
+      // Auto-guess only when the user hasn't chosen yet.
+      // Never auto-tick a stage that says "no fund" / "not funded" / "unfunded".
+      const nm = (st.name||'').toLowerCase();
+      const negative = /no\s*fund|not\s*fund|un-?fund|without\s*fund/.test(nm);
+      const positive = (/fund|won|deposit/.test(nm) || /WON/.test(st.id)) && !negative;
+      const checked = cfg.fundedStages.length
+        ? cfg.fundedStages.includes(st.id)
+        : positive;
+      return `<label><input type="checkbox" value="${esc(st.id)}" ${checked?'checked':''}> ${esc(st.name)} <span style="color:var(--muted)">(${esc(st.id)})</span></label>`;
+    }).join('');
+  }
+}
+
+async function testConnection(){
+  cfg.webhook=$('#whUrl').value.trim();
+  const out=$('#testResult');
+  if(!cfg.webhook){ out.textContent='Paste the webhook URL first.'; out.style.color='var(--lost)'; return; }
+  out.textContent='Testing…'; out.style.color='var(--muted)';
+  try{
+    await loadMeta();
+    out.textContent='Connected. Stages, sources and '+Object.keys(meta.users).length+' users loaded.';
+    out.style.color='var(--funded)';
+    $('#connDot').classList.add('on'); $('#connTxt').textContent='Connected';
+    fillSettingsUI();
+  }catch(e){
+    const origin = location.origin;
+    const isFile = location.protocol==='file:';
+    const looksCors = /Failed to fetch|NetworkError|Load failed/i.test(e.message);
+    if(isFile){
+      out.innerHTML = 'This page is opened as a local file, so the browser origin is "null" and Bitrix blocks it. Host it over http/https (GitHub Pages or localhost), then test again.';
+    }else if(looksCors){
+      out.innerHTML = 'Reached the network but the request was blocked — almost certainly CORS. Your Bitrix portal must allow this origin:<br><b style="color:var(--ink)">'+esc(origin)+'</b><br>Ask whoever manages mubashercapitalcrm.com to add that origin to the server\'s <b>Access-Control-Allow-Origin</b> header (nginx/apache) or the portal\'s allowed-origins list, then test again.';
+    }else{
+      out.textContent = 'Failed: '+e.message;
+    }
+    out.style.color='var(--lost)';
+  }
+  setLoading(false);
+}
+
+async function saveAndLoad(){
+  cfg.webhook=$('#whUrl').value.trim();
+  cfg.campaignField=$('#fCampaign').value;
+  cfg.campaignFieldDeal=$('#fCampaignDeal').value;
+  cfg.prevCampaignField=$('#fPrevCampaign').value;
+  cfg.campaignDateField=$('#fCampaignDate').value;
+  cfg.channelField=$('#fChannel').value||'SOURCE_ID';
+  cfg.weekStart=parseInt($('#weekStart').value,10)||0;
+  cfg.fupCats=[...document.querySelectorAll('#fupCats input:checked')].map(i=>i.value);
+  cfg.fupOutgoing=$('#fupOutgoing').checked;
+  cfg.fundedStages=[...document.querySelectorAll('#fundedStages input:checked')].map(i=>i.value);
+  cfg.trackComments=$('#trackComments').checked;
+  cfg.noAnswerStages=[...document.querySelectorAll('#noAnswerStages input:checked')].map(i=>i.value);
+  const allEmp=[...document.querySelectorAll('#showEmployees input')].map(i=>i.value);
+  const pickEmp=[...document.querySelectorAll('#showEmployees input:checked')].map(i=>i.value);
+  cfg.showEmployees = (pickEmp.length===allEmp.length) ? [] : pickEmp;  // empty = show all
+  saveCfg();
+  closeDrawer();
+  focus={campaigns:[],channel:'',source:'',employees:[]};
+  await fullRefresh();
+}
+
+async function fullRefresh(){
+  if(!cfg.webhook){ openDrawer(); return; }
+  clearError();
+  try{
+    setLoading('Connecting…');
+    if(!meta.leadStages.length) await loadMeta();
+    $('#connDot').classList.add('on'); $('#connTxt').textContent='Connected';
+    await loadData();
+    renderAll();
+  }catch(e){
+    const origin = location.origin;
+    if(location.protocol==='file:'){
+      showError('This page is opened as a local file (origin "null"), which Bitrix blocks. Host it over GitHub Pages or http://localhost and reload.');
+    }else if(/rate-limiting|THROTTLED/i.test(e.message)){
+      showError('Your Bitrix portal is rate-limiting the dashboard (HTTP 503). This is not a CORS problem. Try a shorter period (Today or This week), or turn off comment tracking in Settings, then Refresh.');
+    }else if(/Failed to fetch|NetworkError|Load failed/i.test(e.message)){
+      showError('Request failed after retries. This is usually the portal throttling (503 responses carry no CORS headers, so the console calls it CORS). Try Today instead of a long period, or switch off comment tracking. If it persists on every attempt, Bitrix may genuinely need this origin allowed: '+origin);
+    }else{
+      showError('Could not load data: '+e.message);
+    }
+    $('#connDot').classList.remove('on'); $('#connTxt').textContent='Error';
+  }
+  setLoading(false);
+}
+
+/* ---------------- boot ---------------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadCfg();
+  setPeriod('week');
+  $('#btnSettings').addEventListener('click', openDrawer);
+  $('#btnRefresh').addEventListener('click', fullRefresh);
+  $('#btnTest').addEventListener('click', testConnection);
+  $('#btnSave').addEventListener('click', saveAndLoad);
+  $('#focusCampBtn').addEventListener('click', e=>{
+    e.stopPropagation();
+    const open=$('#focusCampPanel').classList.toggle('show');
+    $('#focusCampBtn').setAttribute('aria-expanded', open?'true':'false');
+  });
+  $('#focusCampPanel').addEventListener('click', e=>e.stopPropagation());
+  const setAllCamp = on => {
+    const inputs=[...$('#focusCampList').querySelectorAll('input')];
+    inputs.forEach(i=>i.checked=on);
+    onCampaignFocusChange();
+  };
+  $('#msCampAll').addEventListener('click', e=>{ e.stopPropagation(); setAllCamp(true); });
+  $('#msCampNone').addEventListener('click', e=>{ e.stopPropagation(); setAllCamp(false); });
+  $('#focusChannel').addEventListener('change', async e=>{ focus.channel=e.target.value; await refreshCohort(); });
+  $('#focusSource').addEventListener('change', async e=>{ focus.source=e.target.value; await refreshCohort(); });
+  $('#focusEmpBtn').addEventListener('click', e=>{
+    e.stopPropagation();
+    const open=$('#focusEmpPanel').classList.toggle('show');
+    $('#focusEmpBtn').setAttribute('aria-expanded', open?'true':'false');
+  });
+  $('#focusEmpPanel').addEventListener('click', e=>e.stopPropagation());
+  document.addEventListener('click', ()=>{
+    $('#focusEmpPanel').classList.remove('show');
+    $('#focusEmpBtn').setAttribute('aria-expanded','false');
+  });
+  const setAllEmp = on => {
+    const inputs=[...$('#focusEmpList').querySelectorAll('input')];
+    inputs.forEach(i=>i.checked=on);
+    focus.employees = on ? inputs.map(i=>i.value) : [];
+    updateEmpBtn();
+    renderBreakdowns();
+  };
+  $('#msAll').addEventListener('click', e=>{ e.stopPropagation(); setAllEmp(true); });
+  $('#msNone').addEventListener('click', e=>{ e.stopPropagation(); setAllEmp(false); });
+  $('#btnEmpAll').addEventListener('click', ()=>{ document.querySelectorAll('#showEmployees input').forEach(i=>i.checked=true); });
+  $('#btnEmpNone').addEventListener('click', ()=>{ document.querySelectorAll('#showEmployees input').forEach(i=>i.checked=false); });
+  $('#btnClearFocus').addEventListener('click', ()=>{
+    focus={campaigns:[],channel:'',source:'',employees:[]};
+    data.cohort={label:'', key:'', campaigns:[], leads:[], deals:[], loaded:false};
+    $('#focusCampList').querySelectorAll('input').forEach(i=>i.checked=false);
+    $('#focusChannel').value=''; $('#focusSource').value='';
+    updateCampBtn();
+    $('#focusEmpList').querySelectorAll('input').forEach(i=>i.checked=false);
+    updateEmpBtn();
+    renderBreakdowns();
+  });
+  document.querySelectorAll('.chipbtn[data-p]').forEach(b=>b.addEventListener('click', async ()=>{
+    setPeriod(b.dataset.p);
+    // Re-render instantly when the requested period sits inside what's already
+    // loaded. Only hit Bitrix when we genuinely need a wider range.
+    if(periodInLoadedWindow()){ renderBreakdowns(); renderOverview(); }
+    else if(cfg.webhook){ await fullRefresh(); }
+  }));
+  $('#btnApplyCustom').addEventListener('click', async ()=>{
+    const f=$('#cFrom').value, t=$('#cTo').value;
+    if(!f||!t){ showError('Pick both dates for the custom period.'); return; }
+    clearError();
+    period.key='custom';
+    period.from=startOfDay(new Date(f));
+    period.to=endOfDay(new Date(t));
+    document.querySelectorAll('.chipbtn[data-p]').forEach(x=>x.classList.remove('active'));
+    if(periodInLoadedWindow()){ renderBreakdowns(); renderOverview(); }
+    else if(cfg.webhook) await fullRefresh();
+  });
+  if(cfg.webhook) fullRefresh();
+});
+</script>
+</body>
+</html>
